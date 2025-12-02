@@ -1,0 +1,9 @@
+php_flag engine off
+
+<FilesMatch "\.(php|php5|phtml|phar)$">
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "\.(bin|zip|tar|gz)$">
+    Allow from all
+</FilesMatch>

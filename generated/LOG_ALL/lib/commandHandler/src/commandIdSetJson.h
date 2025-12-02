@@ -1,0 +1,33 @@
+const char* commandIdSetJson = R"(
+{
+    "2": "mqtt",
+    "7": "use_key",
+    "22": "stb_bandul_setup",
+    "25": "stb_mekanikal_setup",
+    "3": "interval",
+    "4": "utcoffset",
+    "5": "last_epoch",
+    "6": "key",
+    "8": "sn",
+    "9": "otaurl",
+    "10": "api_ver1",
+    "11": "api_ver2",
+    "12": "adv_ble",
+    "13": "radio_mode",
+    "14": "radio_param_1",
+    "15": "radio_param_2",
+    "16": "radio_param_3",
+    "17": "radio_param_4",
+    "18": "license",
+    "19": "suspend",
+    "20": "hierarchy_setup",
+    "21": "fingerprint_setup",
+    "23": "pom_setup",
+    "24": "stb_controller_setup",
+    "26": "tracker_setup",
+    "27": "stb_controller_sub_setup",
+    "28": "touch_calibration",
+    "29": "esp_now",
+    "30": "functional_flag"
+}
+)";

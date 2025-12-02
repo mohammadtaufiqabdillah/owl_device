@@ -1,0 +1,188 @@
+<?php
+include '../../connection.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../../login');
+    exit;
+}
+
+$user_id = $_SESSION['user_id'];
+$company_code = $_SESSION['company_code'];
+
+if (!isset($_GET['error_category_id'])) {
+    header('Location: ../error_categories/list');
+    exit;
+}
+
+$error_category_id = intval($_GET['error_category_id']);
+
+$stmt = $conn->prepare("SELECT * FROM device_error_category WHERE error_category_id = ? AND company_code = ?");
+$stmt->bind_param("ii", $error_category_id, $company_code);
+$stmt->execute();
+$result = $stmt->get_result();
+$category = $result->fetch_assoc();
+
+if (!$category) {
+    echo "<script src='../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            swal({
+                title: 'Data tidak ditemukan',
+                text: 'Error Kategori yang dimaksud tidak tersedia.',
+                icon: 'error',
+                buttons: false,
+                timer: 1200
+            }).then(() => {
+                window.location.href = '../error_categories/list';
+            });
+        });
+    </script>";
+    exit;
+}
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $description = trim($_POST['description']);
+
+    $check = $conn->prepare("SELECT 1 FROM device_error_category WHERE company_code = ? AND description = ?");
+    $check->bind_param("is", $company_code, $description);
+    $check->execute();
+    $exist = $check->get_result()->num_rows > 0;
+    if ($exist) {
+        echo "<script src='../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                swal({
+                    title: 'Gagal!',
+                    text: 'Nama error category sudah ada.',
+                    icon: 'error',
+                    button: false,
+                    timer: 1200,
+                }).then(() => window.location.replace('./edit?error_category_id=$error_category_id'));
+        });
+        </script>";
+        exit;
+    }
+
+    $update = $conn->prepare("UPDATE device_error_category SET description = ?, updated_by = ? WHERE error_category_id = ? AND company_code = ?");
+    $update->bind_param("siii", $description, $user_id, $error_category_id, $company_code);
+
+    if ($update->execute()) {
+        echo "
+            <script src='assets/js/plugin/sweetalert/sweetalert.min.js'></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    swal({
+                        title: 'Berhasil!',
+                        text: 'Error Kategori berhasil diperbarui.',
+                        icon: 'success',
+                        buttons: false,
+                        timer: 1200
+                    }).then(() => {
+                        window.location.href = './admin/error_categories/list';
+                    });
+                });
+            </script>";
+    } else {
+        echo "
+            <script src='assets/js/plugin/sweetalert/sweetalert.min.js'></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    swal({
+                        title: 'Gagal!',
+                        text: 'Terjadi kesalahan saat memperbarui data.',
+                        icon: 'error',
+                        buttons: {
+                            confirm: { className: 'btn btn-danger' }
+                        }
+                    });
+                });
+            </script>";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base href="/owl_device/">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Edit Error Category</title>
+    <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
+    <link rel="icon" href="assets/img/OWLlogo.png" type="image/x-icon" />
+
+    <!-- Fonts and icons -->
+    <script src="assets/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+        WebFont.load({
+            google: { "families": ["Public Sans:300,400,500,600,700"] },
+            custom: { "families": ["Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"], urls: ['assets/css/fonts.min.css'] },
+            active: function () {
+                sessionStorage.fonts = true;
+            }
+        });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/plugins.min.css">
+    <link rel="stylesheet" href="assets/css/kaiadmin.min.css">
+    
+</head>
+
+<body>
+    <div class="wrapper">
+        <?php
+        $rootPath = $_SERVER['DOCUMENT_ROOT'];
+        include $rootPath . "/owl_device/includes/sidebar.php";
+        ?>
+        <div class="main-panel">
+            <?php include $rootPath . "/owl_device/includes/navbar.php"; ?>
+            <div class="container">
+                <div class="page-inner">
+                    <div class="d-flex align-items-center justify-content-between pt-2 pb-4">
+                        <h3 class="fw-bold mb-3">Edit Error Category</h3>
+                    </div>
+                    <div class="card card-round">
+                        <div class="card-header">
+                            <h4 class="card-title mb-0">Edit Error Category Data</h4>
+                        </div>
+                        <form method="POST">
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="description">Error Category Name</label>
+                                    <input type="text" class="form-control form-control-border border-width-2"
+                                        id="description" name="description"
+                                        value="<?= htmlspecialchars($category['description']); ?>">
+                                </div>
+                            </div>
+                            <div class="card-footer d-flex justify-content-end gap-3">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                                <button type="button" class="btn btn-secondary"
+                                    onclick="window.location.href='admin/error_categories/list'">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--   Core JS Files   -->
+    <script src="assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="assets/js/core/popper.min.js"></script>
+    <script src="assets/js/core/bootstrap.min.js"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+
+    <!-- Sweet Alert -->
+    <script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+
+    <!-- Kaiadmin JS -->
+    <script src="assets/js/kaiadmin.min.js"></script>
+</body>
+
+</html>

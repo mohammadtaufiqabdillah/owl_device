@@ -1,0 +1,4 @@
+const char* commandIdSetJson =R"(
+{
+}
+);

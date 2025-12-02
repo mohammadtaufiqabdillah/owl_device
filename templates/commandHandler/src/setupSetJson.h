@@ -1,0 +1,4 @@
+const char* setupSetJson =R"(
+{
+}
+);

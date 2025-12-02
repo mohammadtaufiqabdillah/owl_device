@@ -1,0 +1,13 @@
+{
+    "device_name": "FP307-BW-B6.66",
+    "device_type_id": 1,
+    "generated_at": "2025-11-24T15:54:40+01:00",
+    "commands": [
+        "exe_proof",
+        "pom_data",
+        "restart",
+        "wifi",
+        "mqtt",
+        "testing"
+    ]
+}
