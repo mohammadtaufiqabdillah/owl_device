@@ -64,7 +64,8 @@ while ($r = mysqli_fetch_assoc($linkResult)) {
 <html lang="en">
 
 <head>
-    <base href="/owl_device/">
+    <?php include_once dirname(__FILE__) . '/config_base.php'; ?>
+    <base href="<?= $base ?>">
     <meta charset="utf-8">
     <title>Mapping Commands</title>
     <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
@@ -91,10 +92,10 @@ while ($r = mysqli_fetch_assoc($linkResult)) {
 <body>
     <div class="wrapper">
         <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
-        include $rootPath . "/owl_device/includes/sidebar.php"; ?>
+        include $rootPath . "<?= $base ?>includes/sidebar.php"; ?>
         <div class="main-panel">
             <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
-            include $rootPath . "/owl_device/includes/navbar.php"; ?>
+            include $rootPath . "<?= $base ?>includes/navbar.php"; ?>
             <div class="container">
                 <div class="page-inner">
                     <h3 class="fw-bold mb-3">Manage Commands for <?= htmlspecialchars($dName) ?></h3>

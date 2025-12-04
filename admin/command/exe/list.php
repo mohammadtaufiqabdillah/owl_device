@@ -49,10 +49,11 @@ $result = $stmt->get_result();
 <html lang="en">
 
 <head>
-    <base href="/owl_device/">
+    <?php include_once dirname(__FILE__) . '/config_base.php'; ?>
+    <base href="<?= $base ?>">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Command Exe</title>
+    <title>Commands Exe</title>
     <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
     <link rel="icon" href="assets/img/OWLlogo.png" type="image/x-icon" />
 
@@ -103,10 +104,10 @@ $result = $stmt->get_result();
 <body>
     <div class="wrapper">
         <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
-        include $rootPath . "/owl_device/includes/sidebar.php"; ?>
+        include $rootPath . "<?= $base ?>includes/sidebar.php"; ?>
         <div class="main-panel">
             <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
-            include $rootPath . "/owl_device/includes/navbar.php"; ?>
+            include $rootPath . "<?= $base ?>includes/navbar.php"; ?>
             <div class="container">
                 <div class="page-inner">
                     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
@@ -242,7 +243,7 @@ $result = $stmt->get_result();
                                     buttons: false,
                                     timer: 1200
                                 }).then(function () {
-                                    window.location.replace("/owl_device/admin/command/exe/list");
+                                    window.location.replace("<?= $base ?>admin/command/exe/list");
                                 });
                             } else {
                                 swal({

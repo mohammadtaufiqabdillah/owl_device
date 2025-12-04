@@ -132,7 +132,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 session_unset();
                 session_destroy();
 
-                echo "<script src='/owl_device/assets/js/plugin/sweetalert/sweetalert.min.js'></script>
+                echo "<script src='<?= $base ?>assets/js/plugin/sweetalert/sweetalert.min.js'></script>
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
                         swal({
@@ -141,12 +141,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             icon: 'success',
                             buttons: false,
                             timer: 1200
-                        }).then(function(){ window.location.href = '/owl_device/login'; });
+                        }).then(function(){ window.location.href = '<?= $base ?>login'; });
                     });
                 </script>";
                 exit;
             }
-            echo "<script src='/owl_device/assets/js/plugin/sweetalert/sweetalert.min.js'></script>
+            echo "<script src='<?= $base ?>assets/js/plugin/sweetalert/sweetalert.min.js'></script>
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     swal({
@@ -155,7 +155,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         icon: 'success',
                         buttons: false,
                         timer: 1200
-                    }).then(function(){ window.location.href = '/owl_device/admin/device/list'; });
+                    }).then(function(){ window.location.href = '<?= $base ?>admin/device/list'; });
                 });
             </script>";
             exit;
@@ -177,7 +177,8 @@ $profileSrc = !empty($user['user_profile_picture']) ? $user['user_profile_pictur
 <html lang="id">
 
 <head>
-    <base href="/owl_device/">
+    <?php include_once dirname(__FILE__) . '/config_base.php'; ?>
+    <base href="<?= $base ?>">
     <meta charset="utf-8">
     <title>Account Setting</title>
     <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
@@ -223,9 +224,9 @@ $profileSrc = !empty($user['user_profile_picture']) ? $user['user_profile_pictur
 </head>
 
 <body>
-    <?php include $_SERVER['DOCUMENT_ROOT'] . "/owl_device/includes/sidebar.php"; ?>
+    <?php include $_SERVER['DOCUMENT_ROOT'] . "<?= $base ?>includes/sidebar.php"; ?>
     <div class="main-panel">
-        <?php include $_SERVER['DOCUMENT_ROOT'] . "/owl_device/includes/navbar.php"; ?>
+        <?php include $_SERVER['DOCUMENT_ROOT'] . "<?= $base ?>includes/navbar.php"; ?>
 
         <div class="container">
             <div class="page-inner">

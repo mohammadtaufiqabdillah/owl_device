@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("sssssi", $username, $user_email, $user_name, $password, $token, $status);
 
             if ($stmt->execute()) {
-                $verify_link = "http://" . $_SERVER['HTTP_HOST'] . "/owl_device/verify?token=" . $token;
+                $verify_link = "http://" . $_SERVER['HTTP_HOST'] . "<?= $base ?>/verify?token=" . $token;
 
                 if ($isLocal) {
                     $logMessage = "=== EMAIL SIMULASI (LOCAL) ===\nKepada: $user_email\nSubjek: Verifikasi Akun OWL Device\nLink: $verify_link\n\n";
@@ -88,7 +88,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 
 <head>
-    <base href="/owl_device/">
+    <?php include_once dirname(__FILE__) . '/config_base.php'; ?>
+    <base href="<?= $base ?>">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Register</title>

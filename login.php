@@ -70,7 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 
 <head>
-    <base href="/owl_device/">
+    <?php include_once dirname(__FILE__) . '/config_base.php'; ?>
+    <base href="<?= $base ?>">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Login</title>

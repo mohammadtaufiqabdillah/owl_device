@@ -1,4 +1,6 @@
 <?php
+include_once dirname(__FILE__) . '/config_base.php'; ?>
+<?php
 // admin/device/generate.php
 // FINAL generate.php - produce firmware/library skeleton from templates
 // - writes C-string JSON headers (R"( ... )")
@@ -598,12 +600,12 @@ foreach ($files as $file) {
 }
 $zip->close();
 
-$download = '/owl_device/generated/' . $zipname;
+$download = '<?= $base ?>generated/' . $zipname;
 
 echo json_encode([
     'status' => 'success',
     'zip' => $download,
-    'generated_dir' => "/owl_device/generated/{$safe_device_folder}/",
+    'generated_dir' => "<?= $base ?>generated/{$safe_device_folder}/",
     'info' => $meta
 ]);
 exit;

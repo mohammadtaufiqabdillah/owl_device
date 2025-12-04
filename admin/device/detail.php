@@ -118,7 +118,8 @@ $resultError = mysqli_query($conn, $queryError);
 <html lang="en">
 
 <head>
-    <base href="/owl_device/">
+    <?php include_once dirname(__FILE__) . '/config_base.php'; ?>
+    <base href="<?= $base ?>">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Device Detail</title>
@@ -164,10 +165,10 @@ $resultError = mysqli_query($conn, $queryError);
 <body>
     <div class="wrapper">
         <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
-        include $rootPath . "/owl_device/includes/sidebar.php"; ?>
+        include $rootPath . "<?= $base ?>includes/sidebar.php"; ?>
         <div class="main-panel">
             <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
-            include $rootPath . "/owl_device/includes/navbar.php"; ?>
+            include $rootPath . "<?= $base ?>includes/navbar.php"; ?>
             <div class="container">
                 <div class="page-inner">
                     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">

@@ -1,23 +1,20 @@
 <?php
-include $_SERVER['DOCUMENT_ROOT'] . "/owl_device/connection.php";
+include $_SERVER['DOCUMENT_ROOT'] . "<?= $base ?>connection.php";
 
-// Ambil data dari session
 $user_id = $_SESSION['user_id'] ?? null;
 $user_name = $_SESSION['user_name'] ?? "User";
 $user_email = $_SESSION['user_email'] ?? "";
 $profile_pic = $_SESSION['user_profile_picture'] ?? "assets/img/profile.jpg";
 
-// Base path folder project
-$basePath = $_SERVER['DOCUMENT_ROOT'] . "/owl_device/";
+$basePath = $_SERVER['DOCUMENT_ROOT'] . "<?= $base ?>";
 
-// Normalisasi path (hapus slash awal biar tidak double)
 $relativePath = ltrim($profile_pic, '/');
 
 // Cek apakah file benar-benar ada
 if (file_exists($basePath . $relativePath)) {
-    $profile_url = "/owl_device/" . $relativePath;
+    $profile_url = "<?= $base ?>" . $relativePath;
 } else {
-    $profile_url = "/owl_device/assets/img/profile.jpg";
+    $profile_url = "<?= $base ?>assets/img/profile.jpg";
 }
 ?>
 <div class="main-header">
@@ -55,7 +52,7 @@ if (file_exists($basePath . $relativePath)) {
                         </li>
 
                         <li>
-                            <a class="dropdown-item" href="/owl_device/admin/account_setting">
+                            <a class="dropdown-item" href="<?= $base ?>admin/account_setting">
                                 Account Setting
                             </a>
                         </li>
@@ -65,7 +62,7 @@ if (file_exists($basePath . $relativePath)) {
                         </li>
 
                         <li>
-                            <a class="dropdown-item" href="/owl_device/logout">
+                            <a class="dropdown-item" href="<?= $base ?>logout">
                                 Logout
                             </a>
                         </li>

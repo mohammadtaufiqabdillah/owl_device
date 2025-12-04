@@ -85,10 +85,11 @@ $datName = $command_dat['command_name'];
 <html lang="en">
 
 <head>
-    <base href="/owl_device/">
+    <?php include_once dirname(__FILE__) . '/config_base.php'; ?>
+    <base href="<?= $base ?>">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Command Dat Detail</title>
+    <title>Create Command Dat Detail</title>
     <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
     <link rel="icon" href="assets/img/OWLlogo.png" type="image/x-icon" />
 
@@ -135,10 +136,10 @@ $datName = $command_dat['command_name'];
 <body>
     <div class="wrapper">
         <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
-        include $rootPath . "/owl_device/includes/sidebar.php"; ?>
+        include $rootPath . "<?= $base ?>includes/sidebar.php"; ?>
         <div class="main-panel">
             <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
-            include $rootPath . "/owl_device/includes/navbar.php"; ?>
+            include $rootPath . "<?= $base ?>includes/navbar.php"; ?>
             <div class="container">
                 <div class="page-inner">
                     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
@@ -281,7 +282,7 @@ $datName = $command_dat['command_name'];
                                     buttons: false,
                                     timer: 1200
                                 }).then(function () {
-                                    window.location.replace("/owl_device/admin/command/dat/detail/list?command_id=<?= $command_id ?>");
+                                    window.location.replace("<?= $base ?>admin/command/dat/detail/list?command_id=<?= $command_id ?>");
                                 });
                             } else {
                                 swal({

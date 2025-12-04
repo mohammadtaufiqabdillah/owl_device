@@ -120,7 +120,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 
 <head>
-    <base href="/owl_device/">
+    <?php include_once dirname(__FILE__) . '/config_base.php'; ?>
+    <base href="<?= $base ?>">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Edit Company</title>
@@ -148,9 +149,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
     <div class="wrapper">
-        <?php include $_SERVER['DOCUMENT_ROOT'] . "/owl_device/includes/sidebar.php"; ?>
+        <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
+        include $rootPath . "<?= $base ?>includes/sidebar.php"; ?>
         <div class="main-panel">
-            <?php include $_SERVER['DOCUMENT_ROOT'] . "/owl_device/includes/navbar.php"; ?>
+            <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
+            include $rootPath . "<?= $base ?>includes/navbar.php"; ?>
             <div class="container">
                 <div class="page-inner">
                     <h3 class="fw-bold mb-3">Edit Company</h3>
