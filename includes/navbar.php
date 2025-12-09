@@ -1,20 +1,33 @@
 <?php
-include $_SERVER['DOCUMENT_ROOT'] . "<?= $base ?>connection.php";
+include __DIR__ . '/../config_base.php';
+include __DIR__ . '/../connection.php';
 
 $user_id = $_SESSION['user_id'] ?? null;
 $user_name = $_SESSION['user_name'] ?? "User";
 $user_email = $_SESSION['user_email'] ?? "";
 $profile_pic = $_SESSION['user_profile_picture'] ?? "assets/img/profile.jpg";
 
-$basePath = $_SERVER['DOCUMENT_ROOT'] . "<?= $base ?>";
+$projectRootDir = realpath(__DIR__ . '/..') . DIRECTORY_SEPARATOR;
 
 $relativePath = ltrim($profile_pic, '/');
 
-// Cek apakah file benar-benar ada
-if (file_exists($basePath . $relativePath)) {
-    $profile_url = "<?= $base ?>" . $relativePath;
+$fullPath = $projectRootDir . str_replace('/', DIRECTORY_SEPARATOR, $relativePath);
+
+if (function_exists('base_url')) {
+    $asset = function ($p) {
+        return base_url($p);
+    };
 } else {
-    $profile_url = "<?= $base ?>assets/img/profile.jpg";
+    $asset = function ($p) {
+        $root = defined('BASE_URL') ? rtrim(BASE_URL, '/') : '/';
+        return $root . '/' . ltrim($p, '/');
+    };
+}
+
+if ($fullPath && file_exists($fullPath)) {
+    $profile_url = $asset($relativePath);
+} else {
+    $profile_url = $asset('assets/img/profile.jpg');
 }
 ?>
 <div class="main-header">
@@ -52,7 +65,7 @@ if (file_exists($basePath . $relativePath)) {
                         </li>
 
                         <li>
-                            <a class="dropdown-item" href="<?= $base ?>admin/account_setting">
+                            <a class="dropdown-item" href="admin/account_setting">
                                 Account Setting
                             </a>
                         </li>
@@ -62,7 +75,7 @@ if (file_exists($basePath . $relativePath)) {
                         </li>
 
                         <li>
-                            <a class="dropdown-item" href="<?= $base ?>logout">
+                            <a class="dropdown-item" href="logout">
                                 Logout
                             </a>
                         </li>

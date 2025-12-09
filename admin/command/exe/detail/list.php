@@ -1,5 +1,6 @@
 <?php
-include '../../../../connection.php';
+require_once '../../../../config_base.php';
+require_once '../../../../connection.php';
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../../../../login');
     exit;
@@ -85,8 +86,7 @@ $exeName = $command_exe['command_name'];
 <html lang="en">
 
 <head>
-    <?php include_once dirname(__FILE__) . '/config_base.php'; ?>
-    <base href="<?= $base ?>">
+    <base href="<?php echo BASE_URL; ?>">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Commands Exe Detail</title>
@@ -135,11 +135,9 @@ $exeName = $command_exe['command_name'];
 
 <body>
     <div class="wrapper">
-        <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
-        include $rootPath . "<?= $base ?>includes/sidebar.php"; ?>
+        <?php include '../../../../includes/sidebar.php'; ?>
         <div class="main-panel">
-            <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
-            include $rootPath . "<?= $base ?>includes/navbar.php"; ?>
+            <?php include '../../../../includes/navbar.php'; ?>
             <div class="container">
                 <div class="page-inner">
                     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
@@ -225,7 +223,7 @@ $exeName = $command_exe['command_name'];
             </div>
         </div>
     </div>
-    
+
     <!--   Core JS Files   -->
     <script src="assets/js/core/jquery-3.7.1.min.js"></script>
     <script src="assets/js/core/popper.min.js"></script>
@@ -282,7 +280,7 @@ $exeName = $command_exe['command_name'];
                                     buttons: false,
                                     timer: 1200
                                 }).then(function () {
-                                    window.location.replace("<?= $base ?>admin/command/exe/detail/list?command_id=<?= $command_id ?>");
+                                    window.location.replace("admin/command/exe/detail/list?command_id=<?= $command_id ?>");
                                 });
                             } else {
                                 swal({

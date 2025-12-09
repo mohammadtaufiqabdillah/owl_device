@@ -1,19 +1,34 @@
 <?php
-$rootPath = rtrim($_SERVER['DOCUMENT_ROOT'], '/');
-$projectBase = $rootPath . '/owl_device';
+require_once __DIR__ . '/../config_base.php';
+require_once __DIR__ . '/../connection.php';
 
-include $projectBase . '/connection.php';
-
+$projectRootDir = realpath(__DIR__ . '/..');
+if ($projectRootDir === false) {
+    $projectRootDir = rtrim($_SERVER['DOCUMENT_ROOT'], DIRECTORY_SEPARATOR);
+}
+if (!function_exists('asset_url')) {
+    if (function_exists('base_url')) {
+        function asset_url($p)
+        {
+            return base_url($p);
+        }
+    } else {
+        function asset_url($p)
+        {
+            $root = defined('BASE_URL') ? rtrim(BASE_URL, '/') : '';
+            return rtrim($root, '/') . '/' . ltrim($p, '/');
+        }
+    }
+}
 if (!isset($_SESSION['user_id'])) {
-    header("Location: /owl_device/login");
+    header("Location: " . asset_url('login'));
     exit;
 }
-
 $user_id = intval($_SESSION['user_id']);
 $company_code = isset($_SESSION['company_code']) ? intval($_SESSION['company_code']) : 0;
 
 $uploadDirRel = "assets/upload/profile/";
-$uploadDir = $projectBase . '/' . $uploadDirRel;
+$uploadDir = rtrim($projectRootDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $uploadDirRel);
 if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0755, true);
 }
@@ -83,9 +98,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             if (move_uploaded_file($file['tmp_name'], $target)) {
                 if (!empty($user['user_profile_picture'])) {
-                    $old = $projectBase . '/' . ltrim($user['user_profile_picture'], '/');
-                    if (file_exists($old) && strpos($user['user_profile_picture'], $uploadDirRel) === 0) {
-                        @unlink($old);
+                    $oldRel = ltrim($user['user_profile_picture'], '/');
+                    $oldFs = rtrim($projectRootDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $oldRel);
+
+                    if (file_exists($oldFs) && strpos($user['user_profile_picture'], $uploadDirRel) === 0) {
+                        @unlink($oldFs);
                     }
                 }
                 $newProfileRel = $uploadDirRel . $newName;
@@ -131,8 +148,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             if ($changePassword) {
                 session_unset();
                 session_destroy();
-
-                echo "<script src='<?= $base ?>assets/js/plugin/sweetalert/sweetalert.min.js'></script>
+                echo "<script src='../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
                         swal({
@@ -141,12 +157,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             icon: 'success',
                             buttons: false,
                             timer: 1200
-                        }).then(function(){ window.location.href = '<?= $base ?>login'; });
+                        }).then(function(){ window.location.href = 'login'; });
                     });
                 </script>";
                 exit;
             }
-            echo "<script src='<?= $base ?>assets/js/plugin/sweetalert/sweetalert.min.js'></script>
+            echo "<script src='../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     swal({
@@ -155,7 +171,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         icon: 'success',
                         buttons: false,
                         timer: 1200
-                    }).then(function(){ window.location.href = '<?= $base ?>admin/device/list'; });
+                    }).then(function(){ window.location.href = '../admin/device/list'; });
                 });
             </script>";
             exit;
@@ -170,15 +186,21 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 
-$profileSrc = !empty($user['user_profile_picture']) ? $user['user_profile_picture'] : "assets/img/profile.jpg";
+
+$profileRel = !empty($user['user_profile_picture']) ? $user['user_profile_picture'] : "assets/img/profile.jpg";
+if (function_exists('base_url')) {
+    $profileSrc = base_url($profileRel);
+} else {
+    $profileSrc = rtrim(BASE_URL, '/') . '/' . ltrim($profileRel, '/');
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
 
 <head>
-    <?php include_once dirname(__FILE__) . '/config_base.php'; ?>
-    <base href="<?= $base ?>">
+
+    <base href="<?php echo BASE_URL; ?>">
     <meta charset="utf-8">
     <title>Account Setting</title>
     <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
@@ -200,7 +222,6 @@ $profileSrc = !empty($user['user_profile_picture']) ? $user['user_profile_pictur
     <link rel="stylesheet" href="assets/css/kaiadmin.min.css">
 
     <style>
-        /* gambar profil bulat dan crop */
         .profile-img {
             width: 120px;
             height: 120px;
@@ -224,10 +245,10 @@ $profileSrc = !empty($user['user_profile_picture']) ? $user['user_profile_pictur
 </head>
 
 <body>
-    <?php include $_SERVER['DOCUMENT_ROOT'] . "<?= $base ?>includes/sidebar.php"; ?>
-    <div class="main-panel">
-        <?php include $_SERVER['DOCUMENT_ROOT'] . "<?= $base ?>includes/navbar.php"; ?>
 
+    <?php include $projectRootDir . '/includes/sidebar.php'; ?>
+    <div class="main-panel">
+        <?php include $projectRootDir . '/includes/navbar.php'; ?>
         <div class="container">
             <div class="page-inner">
                 <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
@@ -303,7 +324,8 @@ $profileSrc = !empty($user['user_profile_picture']) ? $user['user_profile_pictur
                                                 <i class="fa fa-eye" id="icon_password"></i>
                                             </span>
                                         </div>
-                                        <small class="text-muted">Kosongkan jika tidak ingin mengganti password.</small>
+                                        <small class="text-muted">
+                                            Kosongkan jika tidak ingin mengganti password.</small>
                                     </div>
 
                                     <div class="card-footer d-flex justify-content-end gap-3">

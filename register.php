@@ -1,4 +1,5 @@
 <?php
+require_once 'config_base.php';
 include 'connection.php';
 include 'config_email.php';
 require 'vendor/autoload.php';
@@ -88,8 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 
 <head>
-    <?php include_once dirname(__FILE__) . '/config_base.php'; ?>
-    <base href="<?= $base ?>">
+    <base href="<?php echo BASE_URL; ?>">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Register</title>

@@ -1,5 +1,6 @@
 <?php
-include '../../../../connection.php';
+require_once '../../../../config_base.php';
+require_once '../../../../connection.php';
 
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../../../../login');
@@ -105,8 +106,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 
 <head>
-    <?php include_once dirname(__FILE__) . '/config_base.php'; ?>
-    <base href="<?= $base ?>">
+<<<<<<< HEAD
+    <base href="<?php echo BASE_URL; ?>">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Create Command Exe Detail</title>
@@ -134,10 +135,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
     <div class="wrapper">
+<<<<<<< HEAD
+        <?php include '../../../../includes/sidebar.php'; ?>
+        <div class="main-panel">
+            <?php include '../../../../includes/navbar.php'; ?>
+=======
         <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
         include $rootPath . "<?= $base ?>includes/sidebar.php"; ?>
         <div class="main-panel">
             <?php include $rootPath . "<?= $base ?>includes/navbar.php"; ?>
+>>>>>>> d763e68f8513460b346d857af9e02c268ca0fca9
             <div class="container">
                 <div class="page-inner">
                     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">

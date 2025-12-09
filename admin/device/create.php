@@ -1,8 +1,9 @@
 <?php
-include '../../connection.php';
+require_once '../../config_base.php';
+require_once '../../connection.php';
 
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../../login');
+    header('Location:' . base_url('login'));
     exit;
 }
 
@@ -214,8 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 
 <head>
-    <?php include_once dirname(__FILE__) . '/config_base.php'; ?>
-    <base href="<?= $base ?>">
+    <base href="<?php echo BASE_URL; ?>">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Create Device</title>
@@ -278,11 +278,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
     <div class="wrapper">
-        <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
-        include $rootPath . "<?= $base ?>includes/sidebar.php"; ?>
+        <?php include __DIR__ . '/../../includes/sidebar.php'; ?>
         <div class="main-panel">
-            <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
-            include $rootPath . "<?= $base ?>includes/navbar.php"; ?>
+            <?php include __DIR__ . '/../../includes/navbar.php'; ?>
             <div class="content">
                 <div class="page-inner">
                     <div class="d-flex align-items-left flex-column pt-2 pb-4">
@@ -391,7 +389,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <!-- JS -->
+    <!--   Core JS Files   -->
     <script src="assets/js/core/jquery-3.7.1.min.js"></script>
     <script src="assets/js/core/popper.min.js"></script>
     <script src="assets/js/core/bootstrap.min.js"></script>
@@ -409,21 +407,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const preview = document.getElementById('previewDeviceImage');
             const dropBox = document.getElementById('dropDeviceImage');
 
-            // Hapus teks drag-drop
             dropBox.innerHTML = `
             <div class="small-muted">Preview will appear here after selecting image</div>
-            <img id="previewDeviceImage" src="#" alt="Preview" style="max-width:250px; display:none; border-radius:10px; margin-top:12px; box-shadow:0 2px 6px rgba(0,0,0,0.15);" />
-        `;
-
-            // Re-bind preview element
+            <img id="previewDeviceImage" src="#" alt="Preview" style="max-width:250px; display:none; border-radius:10px; margin-top:12px; box-shadow:0 2px 6px rgba(0,0,0,0.15);" />`;
             const previewImg = document.getElementById('previewDeviceImage');
 
-            // Preview ketika memilih file
             fileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
 
                 if (!file) {
-                    // Jika cancel → hilangkan preview
                     previewImg.style.display = 'none';
                     previewImg.src = '#';
                     return;

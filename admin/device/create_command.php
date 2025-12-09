@@ -1,5 +1,6 @@
 <?php
-include "../../connection.php";
+require_once '../../config_base.php';
+require_once '../../connection.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../../login");
@@ -64,8 +65,7 @@ while ($r = mysqli_fetch_assoc($linkResult)) {
 <html lang="en">
 
 <head>
-    <?php include_once dirname(__FILE__) . '/config_base.php'; ?>
-    <base href="<?= $base ?>">
+    <base href="<?php echo BASE_URL; ?>">
     <meta charset="utf-8">
     <title>Mapping Commands</title>
     <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
@@ -91,11 +91,17 @@ while ($r = mysqli_fetch_assoc($linkResult)) {
 
 <body>
     <div class="wrapper">
+<<<<<<< HEAD
+        <?php include __DIR__ . '/../../includes/sidebar.php'; ?>
+        <div class="main-panel">
+            <?php include __DIR__ . '/../../includes/navbar.php'; ?>
+=======
         <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
         include $rootPath . "<?= $base ?>includes/sidebar.php"; ?>
         <div class="main-panel">
             <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
             include $rootPath . "<?= $base ?>includes/navbar.php"; ?>
+>>>>>>> d763e68f8513460b346d857af9e02c268ca0fca9
             <div class="container">
                 <div class="page-inner">
                     <h3 class="fw-bold mb-3">Manage Commands for <?= htmlspecialchars($dName) ?></h3>

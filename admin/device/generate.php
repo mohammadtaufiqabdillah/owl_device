@@ -1,21 +1,6 @@
 <?php
-include_once dirname(__FILE__) . '/config_base.php'; ?>
-<?php
-// admin/device/generate.php
-// FINAL generate.php - produce firmware/library skeleton from templates
-// - writes C-string JSON headers (R"( ... )")
-// - generates structs from device_command_detail
-// - puts commandHandler & commonvar (and other folders) under lib/
-// - populates commandHandler/src/commandHandlerQueue.* placeholders
-// - replaces placeholders for commandHandler.h (FIXED)
-// - creates a ZIP with the device folder as root
-// Modifications:
-// - DO NOT write generated_info.json
-// - REMOVE generated_info.json if it exists
-// - Add platformio.ini into generated folder
-// - PATCH: replace placeholders in commandHandler.h ({{LOAD_STRUCT_FUNCTIONS}}, etc)
-
-require "../../connection.php";
+require_once '../../config_base.php';
+require_once '../../connection.php';
 
 header('Content-Type: application/json');
 
@@ -600,12 +585,12 @@ foreach ($files as $file) {
 }
 $zip->close();
 
-$download = '<?= $base ?>generated/' . $zipname;
+$download = 'generated/' . $zipname;
 
 echo json_encode([
     'status' => 'success',
     'zip' => $download,
-    'generated_dir' => "<?= $base ?>generated/{$safe_device_folder}/",
+    'generated_dir' => "<generated/{$safe_device_folder}/",
     'info' => $meta
 ]);
 exit;

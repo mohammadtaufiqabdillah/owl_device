@@ -1,5 +1,6 @@
 <?php
-include '../../connection.php';
+require_once '../../config_base.php';
+require_once '../../connection.php';
 
 if (empty($_SESSION['user_id'])) {
     echo "<script>
@@ -100,8 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 
 <head>
-    <?php include_once dirname(__FILE__) . '/config_base.php'; ?>
-    <base href="<?= $base ?>">
+    <base href="<?php echo BASE_URL; ?>">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Create Company</title>
@@ -129,11 +129,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
     <div class="wrapper">
-        <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
-        include $rootPath . "<?= $base ?>includes/sidebar.php"; ?>
+        <?php include '../../includes/sidebar.php'; ?>
         <div class="main-panel">
-            <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
-            include $rootPath . "<?= $base ?>includes/navbar.php"; ?>
+            <?php include '../../includes/navbar.php'; ?>
             <div class="container">
                 <div class="page-inner">
                     <h3 class="fw-bold mb-3">Create Company</h3>
