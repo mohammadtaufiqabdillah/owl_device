@@ -78,9 +78,6 @@ function apply_replacements($content, $map)
     return str_replace(array_keys($map), array_values($map), $content);
 }
 
-/* ---------------------------
-   load device_type (single row)
-   --------------------------- */
 $stmt = $conn->prepare("
     SELECT dt.*, dc.description AS category_name
     FROM device_type dt
@@ -105,9 +102,6 @@ $DEVICE_TYPE_ID = $device['device_type_id'] ?? $device_type_id;
 $DEVICE_TYPE_CODE = $device['device_type_code'] ?? '';
 $safe_device_folder = preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $DEVICE_NAME);
 
-/* ---------------------------
-   load commands mapped to device
-   --------------------------- */
 $stmt = $conn->prepare("
     SELECT dvc.command_id, dvc.command_code, dvc.command_name, dvc.command_type
     FROM device_vs_command dv
@@ -131,9 +125,6 @@ while ($r = $rs->fetch_assoc()) {
 }
 $stmt->close();
 
-/* ---------------------------
-   load command details for each command
-   --------------------------- */
 $cmd_details_map = [];
 $detail_stmt = $conn->prepare("
     SELECT command_detail_id, command_id, data_name, data_type, data_len, data_default
@@ -156,41 +147,48 @@ foreach ($commands as $c) {
 }
 $detail_stmt->close();
 
-/* ---------------------------
-   categorize commands by type
-   --------------------------- */
 $set_cmd = array_values(array_filter($commands, fn($x) => ($x['command_type'] ?? '') === 'set'));
 $exe_cmd = array_values(array_filter($commands, fn($x) => ($x['command_type'] ?? '') === 'exe'));
 $dat_cmd = array_values(array_filter($commands, fn($x) => ($x['command_type'] ?? '') === 'dat'));
 
-/* ---------------------------
-   copy templates into generated folder
-   --------------------------- */
-$TEMPLATE_DIR = rtrim($_SERVER['DOCUMENT_ROOT'], DIRECTORY_SEPARATOR)
-    . DIRECTORY_SEPARATOR . 'owl_device' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR;
-if (!is_dir($TEMPLATE_DIR))
-    fail("Templates dir not found: $TEMPLATE_DIR");
+$scriptDir = realpath(__DIR__);
+if ($scriptDir === false) {
+    fail("Cannot resolve script directory __DIR__: " . __DIR__);
+}
+$projectRoot = realpath($scriptDir . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..');
+if ($projectRoot === false) {
+    $projectRoot = realpath(rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', DIRECTORY_SEPARATOR));
+}
 
-$OUTPUT_PARENT = rtrim($_SERVER['DOCUMENT_ROOT'], DIRECTORY_SEPARATOR)
-    . DIRECTORY_SEPARATOR . 'owl_device' . DIRECTORY_SEPARATOR . 'generated' . DIRECTORY_SEPARATOR;
+if ($projectRoot === false) {
+    fail("Cannot resolve project root. DOCUMENT_ROOT=" . ($_SERVER['DOCUMENT_ROOT'] ?? '(null)') . " __DIR__=" . __DIR__);
+}
+
+$projectRoot = rtrim(str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $projectRoot), DIRECTORY_SEPARATOR);
+
+$TEMPLATE_DIR = $projectRoot . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR;
+$OUTPUT_PARENT = $projectRoot . DIRECTORY_SEPARATOR . 'generated' . DIRECTORY_SEPARATOR;
 $OUTPUT_DIR = $OUTPUT_PARENT . $safe_device_folder . DIRECTORY_SEPARATOR;
+
+if (!is_dir($TEMPLATE_DIR)) {
+    fail("Templates dir not found: {$TEMPLATE_DIR}\n(Project root detected as: {$projectRoot})");
+}
 
 if (is_dir($OUTPUT_DIR))
     rrmdir($OUTPUT_DIR);
 if (!mkdir($OUTPUT_DIR, 0777, true) && !is_dir($OUTPUT_DIR))
-    fail("Failed to create output dir");
+    fail("Failed to create output dir: {$OUTPUT_DIR}");
 
 if (!rcopy($TEMPLATE_DIR, $OUTPUT_DIR)) {
     rrmdir($OUTPUT_DIR);
-    fail("Failed to copy templates");
+    fail("Failed to copy templates from {$TEMPLATE_DIR} to {$OUTPUT_DIR}");
 }
 
 $lib_dir = $OUTPUT_DIR . 'lib' . DIRECTORY_SEPARATOR;
 if (!is_dir($lib_dir) && !mkdir($lib_dir, 0777, true))
     fail("Cannot create lib dir");
 
-function moveIntoLib($sourceRoot, $folderName, $libDir)
-{
+function moveIntoLib($sourceRoot, $folderName, $libDir){
     $src = rtrim($sourceRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $folderName;
     if (!is_dir($src))
         return;
@@ -210,9 +208,6 @@ foreach ($items as $it) {
         moveIntoLib($OUTPUT_DIR, $it, $lib_dir);
 }
 
-/* ---------------------------
-   placeholders replacements map
-   --------------------------- */
 $replacements = [
     '{{DEVICE_NAME}}' => $DEVICE_NAME,
     '{{CATEGORY_NAME}}' => $CATEGORY_NAME,
@@ -223,8 +218,7 @@ $replacements = [
     '{{DEVICE_NAME_UPPER}}' => strtoupper($DEVICE_NAME)
 ];
 
-function build_setup_map($arr, $detailsMap)
-{
+function build_setup_map($arr, $detailsMap){
     $map = [];
     foreach ($arr as $c) {
         $cid = $c['command_id'];
@@ -272,8 +266,7 @@ $map_set = build_setup_map($set_cmd, $cmd_details_map);
 $map_exe = build_setup_map($exe_cmd, $cmd_details_map);
 $map_dat = build_setup_map($dat_cmd, $cmd_details_map);
 
-function build_id_map($arr)
-{
+function build_id_map($arr){
     $m = [];
     foreach ($arr as $c)
         $m[(string) $c['command_code']] = $c['command_name'];
@@ -284,15 +277,11 @@ $map_set_id = build_id_map($set_cmd);
 $map_exe_id = build_id_map($exe_cmd);
 $map_dat_id = build_id_map($dat_cmd);
 
-function build_cstring($varName, $assoc)
-{
+function build_cstring($varName, $assoc){
     $json = json_encode($assoc, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     return "const char* {$varName} = R\"(\n{$json}\n)\";\n";
 }
 
-/* ---------------------------
-   write generated JSON headers for commandHandler
-   --------------------------- */
 $ch_src_dir = $lib_dir . 'commandHandler' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR;
 if (!is_dir($ch_src_dir) && !mkdir($ch_src_dir, 0777, true))
     fail("Cannot create ch src dir");
@@ -305,9 +294,6 @@ writeOrFail($ch_src_dir . 'commandIdSetJson.h', build_cstring('commandIdSetJson'
 writeOrFail($ch_src_dir . 'commandIdExeJson.h', build_cstring('commandIdExeJson', $map_exe_id));
 writeOrFail($ch_src_dir . 'commandIdDatJson.h', build_cstring('commandIdDatJson', $map_dat_id));
 
-/* ---------------------------
-   build structs, queue text and load functions
-   --------------------------- */
 $struct_text = "";
 $queue_decl_text = "";
 $queue_init_text = "";
@@ -421,14 +407,8 @@ foreach ($commands as $c) {
     }
 }
 
-/* ---------------------------
-   finalize queue send blocks (remove trailing else)
-   --------------------------- */
 $queue_send_blocks = preg_replace('/\s*else\s*$/', "", $queue_send_blocks);
 
-/* ---------------------------
-   apply replacements into template C++ files
-   --------------------------- */
 $possible_cpp_paths = [
     $lib_dir . 'commandHandler/src/commandHandlerQueue.cpp',
     $OUTPUT_DIR . 'commandHandler/src/commandHandlerQueue.cpp'
@@ -484,9 +464,6 @@ foreach ($possible_ch_paths as $p) {
     }
 }
 
-/* ---------------------------
-   do global replacements for text files in output
-   --------------------------- */
 $text_exts = ['h', 'hpp', 'c', 'cpp', 'hxx', 'cxx', 'ino', 'txt', 'json', 'md', 'php'];
 $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($OUTPUT_DIR));
 foreach ($it as $file) {
@@ -502,9 +479,6 @@ foreach ($it as $file) {
         file_put_contents($path, $new);
 }
 
-/* ---------------------------
-   meta / cleanup
-   --------------------------- */
 $meta = [
     'device_name' => $DEVICE_NAME,
     'device_type_id' => $DEVICE_TYPE_ID,
@@ -517,9 +491,6 @@ if (file_exists($OUTPUT_DIR . 'generated_info.json')) {
     @unlink($OUTPUT_DIR . 'generated_info.json');
 }
 
-/* ---------------------------
-   platformio.ini content & write
-   --------------------------- */
 $platformio_ini_content = <<<EOT
 [env:esp32doit-devkit-v1]
 platform = espressif32 @6.11.0
@@ -561,9 +532,6 @@ EOT;
 
 writeOrFail($OUTPUT_DIR . 'platformio.ini', $platformio_ini_content);
 
-/* ---------------------------
-   zip result
-   --------------------------- */
 $zipname = $safe_device_folder . '.zip';
 $zipfull = $OUTPUT_PARENT . $zipname;
 if (file_exists($zipfull))
