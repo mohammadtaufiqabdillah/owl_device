@@ -6,9 +6,9 @@ $current_page = $_SERVER['REQUEST_URI'];
     <div class="sidebar-logo">
         <!-- Logo Header -->
         <div class="logo-header" data-background-color="dark">
-            <a href="admin/device/list" class="logo">
-                <img src="assets/img/OWLLogo.png" alt="OWL Logo" class="navbar-brand brand-image img-circle elevation-3"
-                    height="55" style="opacity: .8;">
+            <a href="./admin/device/list" class="logo">
+                <img src="./assets/img/OWLLogo.png" alt="OWL Logo"
+                    class="navbar-brand brand-image img-circle elevation-3" height="55" style="opacity: .8;">
                 <span class="fw-bold text-white ms-2 logo-text">OWL Device</span>
             </a>
             <div class="nav-toggle">
