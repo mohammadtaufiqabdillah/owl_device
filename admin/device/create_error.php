@@ -105,17 +105,9 @@ while ($r = mysqli_fetch_assoc($linkResult)) {
 
 <body>
     <div class="wrapper">
-<<<<<<< HEAD
         <?php include __DIR__ . '/../../includes/sidebar.php'; ?>
         <div class="main-panel">
             <?php include __DIR__ . '/../../includes/navbar.php'; ?>
-=======
-        <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
-        include $rootPath . "<?= $base ?>includes/sidebar.php"; ?>
-        <div class="main-panel">
-            <?php $rootPath = $_SERVER['DOCUMENT_ROOT'];
-            include $rootPath . "<?= $base ?>includes/navbar.php"; ?>
->>>>>>> d763e68f8513460b346d857af9e02c268ca0fca9
             <div class="container">
                 <div class="page-inner">
                     <h3 class="fw-bold mb-3">Manage Errors for <?= htmlspecialchars($dName) ?></h3>
