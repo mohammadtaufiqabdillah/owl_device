@@ -76,8 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$error) {
-        if (!empty($_FILES['deviceImageFile']) && $_FILES['deviceImageFile']['error'] !== UPLOAD_ERR_NO_FILE) {
-            $f = $_FILES['deviceImageFile'];
+        if (!empty($_FILES['device_image_file']) && $_FILES['device_image_file']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $f = $_FILES['device_image_file'];
             if ($f['error'] !== UPLOAD_ERR_OK) {
                 $error = "Gagal upload device image (error code {$f['error']}).";
             } else {
@@ -111,8 +111,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$error) {
-        if (!empty($_FILES['otaFile']) && $_FILES['otaFile']['error'] !== UPLOAD_ERR_NO_FILE) {
-            $f = $_FILES['otaFile'];
+        if (!empty($_FILES['device_ota_file']) && $_FILES['device_ota_file']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $f = $_FILES['device_ota_file'];
             if ($f['error'] !== UPLOAD_ERR_OK) {
                 $error = "Gagal upload OTA file (error code {$f['error']}).";
             } else {
@@ -348,7 +348,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                                 <div class="form-group">
                                     <label for="otaFile">OTA File</label>
-                                    <input type="file" class="form-control" id="otaFile" name="otaFile"
+                                    <input type="file" class="form-control" id="deviceOtaFile" name="device_ota_file"
                                         accept=".bin,.zip,.tar,.gz,.rar" required>
                                     <small class="small-muted">Allowed: <?php echo implode(', ', $allowedOtaExt); ?> —
                                         max <?php echo ($otaMaxSize / 1024 / 1024); ?> MB</small>
@@ -366,7 +366,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         </div>
                                     </div>
                                     <input type="file" class="form-control mt-2" id="deviceImageFile"
-                                        name="deviceImageFile" accept="image/*" required>
+                                        name="device_image_file" accept="image/*" required>
                                 </div>
 
                                 <div class="form-group">

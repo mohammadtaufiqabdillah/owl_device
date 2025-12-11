@@ -42,18 +42,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail = new PHPMailer(true);
             try {
                 $mail->isSMTP();
-                $mail->Host = 'smtp.gmail.com';
-                $mail->SMTPAuth = true;
+                $mail->Host = $email_host;
+                $mail->SMTPAuth = $email_SMTPAuth;
                 $mail->Username = $email_sender;
                 $mail->Password = $email_password;
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                $mail->Port = 587;
+                $mail->SMTPSecure = $email_SMTPSecure;
+                $mail->Port = $email_Port;                
 
                 $mail->setFrom($email_sender, $email_name);
                 $mail->addAddress($user_email, $user_name);
 
                 $mail->isHTML(true);
-                $mail->Subject = 'Reset Password - OWL Device';
+                $mail->Subject = 'Reset Password - Portal Device';
                 $mail->Body = "
                         <div style='font-family:arial,sans-serif;line-height:1.4'>
                           <h3>Halo {$user_name},</h3>
@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                           <p>Catatan keamanan: setelah login, segera ganti password dengan yang mudah Anda ingat namun kuat.</p>
                           <p>Jika Anda tidak meminta perubahan ini, segera hubungi admin.</p>
                           <hr>
-                          <p style='font-size:12px;color:#666'>OWL Device</p>
+                          <p style='font-size:12px;color:#666'>Portal Device</p>
                         </div>
                     ";
 

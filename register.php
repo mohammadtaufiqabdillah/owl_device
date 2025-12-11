@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("sssssi", $username, $user_email, $user_name, $password, $token, $status);
 
             if ($stmt->execute()) {
-                $verify_link = "http://" . $_SERVER['HTTP_HOST'] . "<?= $base ?>/verify?token=" . $token;
+                $verify_link = "https://" . $_SERVER['HTTP_HOST'] . "<?= $base ?>/verify?token=" . $token;
 
                 if ($isLocal) {
                     $logMessage = "=== EMAIL SIMULASI (LOCAL) ===\nKepada: $user_email\nSubjek: Verifikasi Akun OWL Device\nLink: $verify_link\n\n";
@@ -54,12 +54,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $mail = new PHPMailer(true);
                     try {
                         $mail->isSMTP();
-                        $mail->Host = 'smtp.gmail.com';
-                        $mail->SMTPAuth = true;
+                        $mail->Host = $email_host;
+                        $mail->SMTPAuth = $email_SMTPAuth;
                         $mail->Username = $email_sender;
                         $mail->Password = $email_password;
-                        $mail->SMTPSecure = 'tls';
-                        $mail->Port = 587;
+                        $mail->SMTPSecure = $email_SMTPSecure;
+                        $mail->Port = $email_Port;
 
                         $mail->setFrom($email_sender, $email_name);
                         $mail->addAddress($user_email, $user_name);
