@@ -46,6 +46,12 @@ $current_page = $_SERVER['REQUEST_URI'];
                         <p>Devices</p>
                     </a>
                 </li>
+                <!-- <li class="nav-item <?= (strpos($current_page, '/admin/status_device/') !== false) ? 'active' : '' ?>">
+                    <a href="./admin/status_device/list">
+                        <i class="fas fa-server"></i>
+                        <p>Status Devices</p>
+                    </a>
+                </li> -->
                 <?php
                 $is_command_active = (
                     strpos($current_page, '/admin/command/dat/') !== false ||

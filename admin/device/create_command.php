@@ -63,7 +63,6 @@ while ($r = mysqli_fetch_assoc($linkResult)) {
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <base href="<?php echo BASE_URL; ?>">
     <meta charset="utf-8">

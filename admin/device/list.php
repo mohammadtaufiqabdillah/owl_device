@@ -109,7 +109,7 @@ $result = $stmt->get_result();
         }
 
         .lebar-kolom3 {
-            width: 24%;
+            width: 23%;
         }
 
         .lebar-kolom4 {
@@ -117,7 +117,7 @@ $result = $stmt->get_result();
         }
 
         .lebar-kolom5 {
-            width: 25%;
+            width: 26%;
         }
     </style>
 </head>
@@ -293,7 +293,7 @@ $result = $stmt->get_result();
                     lengthMenu: "Show _MENU_ entries",
                     zeroRecords: "No matching records found",
                 },
-                order: [[0, 'desc']],
+                order: [[0, 'asc']],
                 responsive: true,
             });
 

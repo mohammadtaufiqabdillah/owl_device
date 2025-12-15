@@ -180,7 +180,7 @@ $result = $stmt->get_result();
                     lengthMenu: "Show _MENU_ entries",
                     zeroRecords: "No matching records found",
                 },
-                order: [[0, 'desc']],
+                order: [[0, 'asc']],
                 responsive: true,
             });
 

@@ -96,6 +96,12 @@ $result = $stmt->get_result();
                                             <i class="fas fa-user-plus" style="margin-right: 8px;"></i>Join Company
                                         </button>
                                     </a>
+                                    <a href="admin/companies/list_join" class="mb-2 mb-md-0">
+                                        <button type="button" class="btn btn-info" style="max-width: 200px;">
+                                            <i class="fas fa-address-card" style="margin-right: 8px;"></i>List Join
+                                            Company
+                                        </button>
+                                    </a>
                                     <div id="tableCompanies_length" class="dataTables_length"></div>
                                 </div>
                                 <div class="card-body p-0">
@@ -130,6 +136,10 @@ $result = $stmt->get_result();
                                                                     class="btn btn-info btn-sm">
                                                                     <i class="fas fa-edit"></i>
                                                                 </a>
+                                                                <a href="admin/companies/detail?company_id=<?php echo $row['company_id']; ?>"
+                                                                    class="btn btn-warning btn-sm">
+                                                                    <i class="fas fa-info-circle"></i>
+                                                                </a>
                                                             </td>
                                                         </tr>
                                                         <?php
@@ -147,7 +157,7 @@ $result = $stmt->get_result();
             </div>
         </div>
     </div>
-    
+
     <!--   Core JS Files   -->
     <script src="assets/js/core/jquery-3.7.1.min.js"></script>
     <script src="assets/js/core/popper.min.js"></script>
@@ -200,7 +210,7 @@ $result = $stmt->get_result();
                     lengthMenu: "Show _MENU_ entries",
                     zeroRecords: "No matching records found",
                 },
-                order: [[0, 'desc']],
+                order: [[0, 'asc']],
                 responsive: true,
             });
 

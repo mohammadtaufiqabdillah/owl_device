@@ -9,8 +9,9 @@ if (!isset($_SESSION['user_id'])) {
 
 $userId = $_SESSION['user_id'];
 
-$userData = $conn->query("SELECT company_code FROM device_user WHERE user_id = $userId")->fetch_assoc();
+$userData = $conn->query("SELECT company_code, company_request_code FROM device_user WHERE user_id = $userId")->fetch_assoc();
 $companyCodeUser = $userData['company_code'] ?? null;
+$companyRequestUser = $userData['company_request_code'] ?? null;
 
 if (!empty($companyCodeUser) && $_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo "<script src='../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
@@ -19,6 +20,22 @@ if (!empty($companyCodeUser) && $_SERVER['REQUEST_METHOD'] !== 'POST') {
         swal({
             title: 'Tidak Bisa Bergabung PT Baru!',
             text: 'Kamu sudah tergabung di PT dengan kode: $companyCodeUser',
+            icon: 'info',
+            buttons: false,
+            timer: 1200,
+        }).then(() => window.location.replace('../companies/list'));
+    });
+    </script>";
+    exit;
+}
+
+if (!empty($companyRequestUser) && $_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo "<script src='../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        swal({
+            title: 'Permintaan Bergabung Sedang Diproses!',
+            text: 'Kamu sudah mengirim permintaan bergabung PT dengan kode: $companyRequestUser. Mohon tunggu persetujuan dari pembuat PT.',
             icon: 'info',
             buttons: false,
             timer: 1200,
@@ -41,28 +58,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $company_code = $pt['company_code'];
         $company_name = $pt['company_name'];
 
-        $update = $conn->prepare("UPDATE device_user SET company_code = ? WHERE user_id = ?");
+        $update = $conn->prepare("UPDATE device_user SET company_request_code = ? WHERE user_id = ?");
         $update->bind_param("ii", $company_code, $userId);
         $update->execute();
 
-        $_SESSION['company_code'] = $company_code;
-
-        echo "<script src='../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
+        if ($update) {
+            echo "<script src='../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
         <script>
         document.addEventListener('DOMContentLoaded', function() {
             swal({
-                title: 'Berhasil Bergabung!',
-                text: 'Kamu sekarang menjadi anggota PT $company_name',
+                title: 'Request Dikirim!',
+                text: 'Menunggu persetujuan dari PT: $company_name',
                 icon: 'success',
-                button: 'OK'
+                button: false,
+                timer: 1200,
             }).then(() => window.location = './admin/companies/list');
         });
         </script>";
+        } else {
+            echo "<script src='../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            swal({
+                title: 'Gagal',
+                text: 'Terjadi kesalahan saat mengirim permintaan bergabung.',
+                icon: 'error',
+                button: false,
+                timer: 1200,
+            }).then(() => window.location = './admin/companies/list');
+        });
+        </script>";
+            exit;
+        }
     } else {
         echo "<script src='../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
         <script>
         document.addEventListener('DOMContentLoaded', function() {
-            swal('Token Salah!', 'Token PT tidak ditemukan.', 'error');
+            swal({
+                title: 'Token Tidak Valid!',
+                text: 'Token yang kamu masukkan tidak valid. Silakan coba lagi.',
+                icon: 'error',
+                button: false,
+                timer: 1200,
+            }).then(() => window.location = './admin/companies/list');
         });
         </script>";
         exit;
