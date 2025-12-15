@@ -1,8 +1,8 @@
 <?php
-$email_sender = 'owld.device@gmail.com';
-$email_name = 'OWL Device';
-$email_password = 'dayq mpsg fyjy vtzn'; // App Password for Gmail
-$email_host= 'smtp.gmail.com';
+$email_sender = 'info@coventor.id';
+$email_name = 'Device Portal';
+$email_password = 'Sem4ng4tsukses!'; // App Password for Gmail
+$email_host= 'smtp.zoho.com';
 $email_SMTPAuth = true;
 $email_SMTPSecure = 'tls';
 $email_Port = 587;

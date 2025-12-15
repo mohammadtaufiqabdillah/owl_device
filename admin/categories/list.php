@@ -126,7 +126,7 @@ $result = $stmt->get_result();
             </div>
         </div>
     </div>
-    
+
     <!--   Core JS Files   -->
     <script src="assets/js/core/jquery-3.7.1.min.js"></script>
     <script src="assets/js/core/popper.min.js"></script>
@@ -179,7 +179,7 @@ $result = $stmt->get_result();
                     lengthMenu: "Show _MENU_ entries",
                     zeroRecords: "No matching records found",
                 },
-                order: [[0, 'desc']],
+                order: [[0, 'asc']],
                 responsive: true,
             });
 

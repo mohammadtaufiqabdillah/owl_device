@@ -4,14 +4,15 @@ require_once '../../connection.php';
 
 if (empty($_SESSION['user_id'])) {
     echo "<script>
-        window.location.href = '<?= $base ?>login';
+        window.location.href = '../../login';
     </script>";
     exit;
 }
 
 $userId = $_SESSION['user_id'];
-$userData = $conn->query("SELECT company_code FROM device_user WHERE user_id = $userId")->fetch_assoc();
+$userData = $conn->query("SELECT company_code, company_request_code FROM device_user WHERE user_id = $userId")->fetch_assoc();
 $companyCodeUser = $userData['company_code'] ?? null;
+$companyRequestUser = $userData['company_request_code'] ?? null;
 
 if (!empty($companyCodeUser) && $_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo "<script src='../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
@@ -20,6 +21,22 @@ if (!empty($companyCodeUser) && $_SERVER['REQUEST_METHOD'] !== 'POST') {
         swal({
             title: 'Tidak Bisa Membuat PT Baru!',
             text: 'Kamu sudah tergabung di PT dengan kode: $companyCodeUser',
+            icon: 'info',
+            buttons: false,
+            timer: 1200,
+        }).then(() => window.location.replace('../companies/list'));
+    });
+    </script>";
+    exit;
+}
+
+if (!empty($companyRequestUser) && $_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo "<script src='../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        swal({
+            title: 'Permintaan Bergabung Sedang Diproses!',
+            text: 'Kamu sudah mengirim permintaan bergabung PT dengan kode: $companyRequestUser. Mohon tunggu persetujuan dari pembuat PT.',
             icon: 'info',
             buttons: false,
             timer: 1200,
@@ -64,8 +81,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    $stmt = $conn->prepare("INSERT INTO device_company (company_code, company_name, company_address, company_email, company_telephone_number, company_token, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("isssssi", $company_code, $company_name, $company_address, $company_email, $company_telephone_number, $company_token, $userId);
+    $stmt = $conn->prepare("INSERT INTO device_company (company_code, company_name, company_address, company_email, company_telephone_number, company_token, created_by,  updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("isssssii", $company_code, $company_name, $company_address, $company_email, $company_telephone_number, $company_token, $userId, $userId);
 
     if ($stmt->execute()) {
         $update = $conn->prepare("UPDATE device_user SET company_code = ? WHERE user_id = ?");

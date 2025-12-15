@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("sssssi", $username, $user_email, $user_name, $password, $token, $status);
 
             if ($stmt->execute()) {
-                $verify_link = "https://" . $_SERVER['HTTP_HOST'] . "<?= $base ?>/verify?token=" . $token;
+                $verify_link = "https://" . $_SERVER['HTTP_HOST'] ."/verify?token=" . $token;
 
                 if ($isLocal) {
                     $logMessage = "=== EMAIL SIMULASI (LOCAL) ===\nKepada: $user_email\nSubjek: Verifikasi Akun OWL Device\nLink: $verify_link\n\n";
@@ -64,7 +64,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $mail->setFrom($email_sender, $email_name);
                         $mail->addAddress($user_email, $user_name);
                         $mail->isHTML(true);
-                        $mail->Subject = 'Verifikasi Akun OWL Device';
+                        $verify_link = trim($verify_link);
+                        $verify_link = filter_var($verify_link, FILTER_SANITIZE_URL);
+
+                        $mail->Subject = 'Verifikasi Akun Portal Device';
                         $mail->Body = "
                             <h3>Halo, $user_name!</h3>
                             <p>Terima kasih telah mendaftar di OWL Device.</p>

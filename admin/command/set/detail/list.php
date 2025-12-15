@@ -72,7 +72,7 @@ $stmt2 = $conn->prepare("
     FROM device_command_detail dcd
     INNER JOIN device_command dc ON dc.command_id = dcd.command_id
     WHERE dcd.command_id = ? AND dc.company_code = ?
-    ORDER BY dcd.command_detail_id DESC
+    ORDER BY dcd.command_detail_id ASC
 ");
 $stmt2->bind_param("ii", $command_id, $company_code);
 $stmt2->execute();
