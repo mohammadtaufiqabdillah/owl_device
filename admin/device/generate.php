@@ -166,8 +166,8 @@ if ($projectRoot === false) {
 
 $projectRoot = rtrim(str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $projectRoot), DIRECTORY_SEPARATOR);
 
-$TEMPLATE_DIR = $projectRoot . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR;
-$OUTPUT_PARENT = $projectRoot . DIRECTORY_SEPARATOR . 'generated' . DIRECTORY_SEPARATOR;
+$TEMPLATE_DIR = __DIR__ . '/../../templates/';
+$OUTPUT_PARENT = __DIR__ . '/../../generated/';
 $OUTPUT_DIR = $OUTPUT_PARENT . $safe_device_folder . DIRECTORY_SEPARATOR;
 
 if (!is_dir($TEMPLATE_DIR)) {
@@ -188,7 +188,8 @@ $lib_dir = $OUTPUT_DIR . 'lib' . DIRECTORY_SEPARATOR;
 if (!is_dir($lib_dir) && !mkdir($lib_dir, 0777, true))
     fail("Cannot create lib dir");
 
-function moveIntoLib($sourceRoot, $folderName, $libDir){
+function moveIntoLib($sourceRoot, $folderName, $libDir)
+{
     $src = rtrim($sourceRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $folderName;
     if (!is_dir($src))
         return;
@@ -218,7 +219,8 @@ $replacements = [
     '{{DEVICE_NAME_UPPER}}' => strtoupper($DEVICE_NAME)
 ];
 
-function build_setup_map($arr, $detailsMap){
+function build_setup_map($arr, $detailsMap)
+{
     $map = [];
     foreach ($arr as $c) {
         $cid = $c['command_id'];
@@ -266,7 +268,8 @@ $map_set = build_setup_map($set_cmd, $cmd_details_map);
 $map_exe = build_setup_map($exe_cmd, $cmd_details_map);
 $map_dat = build_setup_map($dat_cmd, $cmd_details_map);
 
-function build_id_map($arr){
+function build_id_map($arr)
+{
     $m = [];
     foreach ($arr as $c)
         $m[(string) $c['command_code']] = $c['command_name'];
@@ -277,7 +280,8 @@ $map_set_id = build_id_map($set_cmd);
 $map_exe_id = build_id_map($exe_cmd);
 $map_dat_id = build_id_map($dat_cmd);
 
-function build_cstring($varName, $assoc){
+function build_cstring($varName, $assoc)
+{
     $json = json_encode($assoc, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     return "const char* {$varName} = R\"(\n{$json}\n)\";\n";
 }
@@ -553,7 +557,7 @@ foreach ($files as $file) {
 }
 $zip->close();
 
-$download = 'generated/' . $zipname;
+$download = 'admin/device/download?file=' . $zipname;
 
 echo json_encode([
     'status' => 'success',
