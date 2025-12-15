@@ -546,15 +546,17 @@ if ($zip->open($zipfull, ZipArchive::CREATE) !== TRUE)
     fail("Cannot create zip at $zipfull");
 
 $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($OUTPUT_DIR), RecursiveIteratorIterator::LEAVES_ONLY);
-$zip_base_dir = rtrim($OUTPUT_DIR, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+$rootLen = strlen(realpath($OUTPUT_DIR)) + 1;
 
 foreach ($files as $file) {
-    if ($file->isFile()) {
-        $filePath = $file->getRealPath();
-        $localPath = substr($filePath, strlen($zip_base_dir));
-        $zip->addFile($filePath, $localPath);
-    }
+    if (!$file->isFile())
+        continue;
+    $filePath = $file->getRealPath();
+    $relativePath = substr($filePath, $rootLen);
+    $relativePath = str_replace(DIRECTORY_SEPARATOR, '/', $relativePath);
+    $zip->addFile($filePath, $relativePath);
 }
+
 $zip->close();
 
 $download = 'admin/device/download?file=' . $zipname;
