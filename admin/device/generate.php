@@ -167,7 +167,7 @@ if ($projectRoot === false) {
 $projectRoot = rtrim(str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $projectRoot), DIRECTORY_SEPARATOR);
 
 $TEMPLATE_DIR = __DIR__.'/../../templates/';
-$OUTPUT_PARENT = __DIR__.'/../../';
+$OUTPUT_PARENT = __DIR__.'/../../generated/';
 $OUTPUT_DIR = $OUTPUT_PARENT . $safe_device_folder . DIRECTORY_SEPARATOR;
 
 if (!is_dir($TEMPLATE_DIR)) {
