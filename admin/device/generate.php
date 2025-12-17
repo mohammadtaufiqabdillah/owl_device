@@ -166,8 +166,8 @@ if ($projectRoot === false) {
 
 $projectRoot = rtrim(str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $projectRoot), DIRECTORY_SEPARATOR);
 
-$TEMPLATE_DIR = __DIR__.'/../../templates/';
-$OUTPUT_PARENT = __DIR__.'/../../generated/';
+$TEMPLATE_DIR = __DIR__ . '/../../templates/';
+$OUTPUT_PARENT = __DIR__ . '/../../generated/';
 $OUTPUT_DIR = $OUTPUT_PARENT . $safe_device_folder . DIRECTORY_SEPARATOR;
 
 if (!is_dir($TEMPLATE_DIR)) {
@@ -252,7 +252,7 @@ function build_setup_map($arr, $detailsMap)
         }
 
         $map[$c['command_name']] = [
-            'commandId' => $c['command_code'],
+            'commandId' => (string) $c['command_code'],
             'key' => array_values($keys),
             'data_type' => array_values($data_types),
             'data_len' => array_values($data_lens),
@@ -321,9 +321,11 @@ foreach ($commands as $c) {
             $d_len = intval($d['data_len'] ?? 0);
             $d_name = sanitize_c_identifier($d['data_name'] ?: 'field');
 
-            if ($d_type === 'string' || $d_type === 'object') {
+            if ($d_type === 'string') {
                 $len = max(1, $d_len);
                 $struct_text .= "    char {$d_name}[{$len}];\n";
+            } elseif ($d_type === 'object') {
+                $struct_text .= "    JsonDocument {$d_name};\n";
             } else {
                 $type = $d_type ?: 'uint8_t';
                 $struct_text .= "    {$type} {$d_name};\n";
