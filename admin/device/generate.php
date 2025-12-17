@@ -257,12 +257,13 @@ function build_setup_map($arr, $detailsMap)
             'data_type' => array_values($data_types),
             'data_len' => array_values($data_lens),
             'default' => array_values($defaults),
-            'path' => '/' . $c['command_name']
         ];
 
         if (($c['command_type'] ?? '') === 'set') {
             $entry['queue'] = $c['command_name'] . 'queue';
         }
+        $entry['path'] = '/' . $c['command_name'];
+
         $map[$c['command_name']] = $entry;
     }
     return $map;
