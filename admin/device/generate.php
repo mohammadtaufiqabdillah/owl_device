@@ -300,6 +300,7 @@ writeOrFail($ch_src_dir . 'commandIdDatJson.h', build_cstring('commandIdDatJson'
 
 $struct_text = "";
 $queue_decl_text = "";
+$queue_decli_text = "";
 $queue_init_text = "";
 $queue_send_blocks = "";
 $load_struct_functions = "";
@@ -336,7 +337,8 @@ foreach ($commands as $c) {
     $struct_text .= "};\n\n";
 
     if (($c['command_type'] ?? '') === 'set') {
-        $queue_decl_text .= "extern QueueHandle_t {$name}Queue;\n";
+        $queue_decl_text .= "QueueHandle_t {$name}Queue;\n";
+        $queue_decli_text .= "extern QueueHandle_t {$name}Queue;\n";
         $queue_init_text .= "    {$name}Queue = xQueueCreate(1, 1);\n";
 
         $queueNameStr = $c['command_name'] . 'queue';
@@ -446,7 +448,7 @@ foreach ($possible_h_paths as $p) {
         $content = file_get_contents($p);
         $map = [
             '{{STRUCT_DEFINITIONS}}' => $struct_text,
-            '{{QUEUE_DECLARATIONS}}' => $queue_decl_text,
+            '{{QUEUE_DECLARATIONS}}' => $queue_decli_text,
             '{{QUEUE_DECLARETIONS}}' => $queue_decl_text,
             '{{STRUCTS_DEFINITIONS}}' => $struct_text
         ];
