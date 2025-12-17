@@ -98,7 +98,13 @@ $result = $stmt->get_result();
                                     </a>
                                     <a href="admin/companies/list_join" class="mb-2 mb-md-0">
                                         <button type="button" class="btn btn-info" style="max-width: 200px;">
-                                            <i class="fas fa-address-card" style="margin-right: 8px;"></i>List Join
+                                            <i class="fas fa-address-book" style="margin-right: 8px;"></i>List Join
+                                            Company
+                                        </button>
+                                    </a>
+                                    <a href="admin/companies/list_user" class="mb-2 mb-md-0">
+                                        <button type="button" class="btn btn-black" style="max-width: 200px;">
+                                            <i class="fas fa-address-card" style="margin-right: 8px;"></i>List User
                                             Company
                                         </button>
                                     </a>
