@@ -380,7 +380,7 @@ foreach ($commands as $c) {
         $fn .= "            return true;\n";
         $fn .= "        }\n";
 
-        $fn .= "        if (!hasValue) {\n";
+        $fn .= "        else if (!hasValue) {\n";
         for ($i = 0; $i < count($details); $i++) {
             $d = $details[$i];
             $d_name = sanitize_c_identifier($d['data_name'] ?: 'field');
@@ -397,7 +397,7 @@ foreach ($commands as $c) {
         $fn .= "        return false;\n";
         $fn .= "    }\n\n";
 
-        $fn .= "    if (loadJson && docResult != nullptr) {\n";
+        $fn .= "    else if (loadJson && docResult != nullptr) {\n";
         $fn .= "        (*docResult)[\"command\"] = \"{$c['command_name']}\";\n";
 
         foreach ($details as $d) {
