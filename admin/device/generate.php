@@ -251,15 +251,19 @@ function build_setup_map($arr, $detailsMap)
             }
         }
 
-        $map[$c['command_name']] = [
+        $entry = [
             'commandId' => (string) $c['command_code'],
             'key' => array_values($keys),
             'data_type' => array_values($data_types),
             'data_len' => array_values($data_lens),
             'default' => array_values($defaults),
-            'queue' => $c['command_name'] . 'queue',
             'path' => '/' . $c['command_name']
         ];
+
+        if (($c['command_type'] ?? '') === 'set') {
+            $entry['queue'] = $c['command_name'] . 'queue';
+        }
+        $map[$c['command_name']] = $entry;
     }
     return $map;
 }
