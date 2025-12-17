@@ -344,7 +344,7 @@ foreach ($commands as $c) {
         $queue_send_blocks .= "if ({$cmp}) {\n    if ({$name}Queue != NULL) {\n        xQueueOverwrite({$name}Queue, &newValues);\n    }\n}\nelse ";
     }
 
-    if (in_array(($c['command_type'] ?? ''), ['set', 'exe', 'dat'])) {
+    if ((($c['command_type'] ?? '') === 'set')) {
         $fn = "bool CommandHandler::loadStruct({$name}_struct &structData, bool internal, bool loadJson, JsonDocument *docResult) {\n";
         $fn .= "    JsonDocument doc;\n";
         $fn .= "    if (!loadJson) {\n";
@@ -470,7 +470,7 @@ foreach ($possible_ch_paths as $p) {
     }
 }
 
-$text_exts = ['h', 'hpp', 'c', 'cpp', 'hxx', 'cxx', 'ino', 'txt', 'json', 'md', 'php'];
+$text_exts = ['h', 'hpp', 'c', 'cpp', 'hxx', 'cxx', 'ino', 'txt', 'json', 'md', 'php', 'ini'];
 $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($OUTPUT_DIR));
 foreach ($it as $file) {
     if (!$file->isFile())
@@ -496,47 +496,6 @@ $meta = [
 if (file_exists($OUTPUT_DIR . 'generated_info.json')) {
     @unlink($OUTPUT_DIR . 'generated_info.json');
 }
-
-$platformio_ini_content = <<<EOT
-[env:esp32doit-devkit-v1]
-platform = espressif32 @6.11.0
-board = esp32doit-devkit-v1
-framework = arduino
-monitor_speed = 115200
-board_build.partitions = min_spiffs.csv
-lib_deps =
-    adafruit/RTClib@^1.14.1
-    256dpi/MQTT @2.5.2
-    bblanchon/ArduinoJson@^7.3.0
-    h2zero/NimBLE-Arduino@^2.1.0
-    mikalhart/TinyGPSPlus
-    jgromes/RadioLib
-;build_flags =
-;    -D CORE_DEBUG_LEVEL=5
-
-;[env:esp32-s3-devkitc-1-n16r8v]
-;platform = espressif32 @6.11.0
-;board = esp32-s3-devkitc-1-n16r8v
-;framework = arduino
-;monitor_speed = 115200
-;monitor_filters = esp32_exception_decoder
-;build_flags =
-;    -DCORE_DEBUG_LEVEL=2
-;    -DBOARD_HAS_PSRAM
-;    -DARDUINO_USB_MODE=1
-;    -DARDUINO_USB_CDC_ON_BOOT=1
-;    -DCONFIG_SPIRAM_USE_MALLOC=1
-;    -DCONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL=4096
-;lib_deps =
-;    adafruit/RTClib@^1.14.1
-;    256dpi/MQTT @2.5.2
-;    bblanchon/ArduinoJson@^7.3.0
-;    h2zero/NimBLE-Arduino@^2.1.0
-;    mikalhart/TinyGPSPlus
-;    jgromes/RadioLib
-EOT;
-
-writeOrFail($OUTPUT_DIR . 'platformio.ini', $platformio_ini_content);
 
 $zipname = $safe_device_folder . '.zip';
 $zipfull = $OUTPUT_PARENT . $zipname;
