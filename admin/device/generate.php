@@ -354,7 +354,7 @@ foreach ($commands as $c) {
         foreach ($details as $d) {
             $d_name = sanitize_c_identifier($d['data_name'] ?: 'field');
             $type = strtolower($d['data_type'] ?? '');
-            if ($type === 'string' || $type === 'object') {
+            if ($type === 'string') {
                 $fn .= "            strcpy(structData.{$d_name}, doc[\"data\"][\"{$d['data_name']}\"]);\n";
             } else {
                 $fn .= "            structData.{$d_name} = doc[\"data\"][\"{$d['data_name']}\"];\n";
@@ -368,7 +368,7 @@ foreach ($commands as $c) {
         foreach ($details as $d) {
             $d_name = sanitize_c_identifier($d['data_name'] ?: 'field');
             $type = strtolower($d['data_type'] ?? '');
-            if ($type === 'string' || $type === 'object') {
+            if ($type === 'string') {
                 $fn .= "            strcpy(structData.{$d_name}, doc[\"data\"][\"{$d['data_name']}\"]);\n";
             } else {
                 $fn .= "            structData.{$d_name} = doc[\"data\"][\"{$d['data_name']}\"];\n";
@@ -383,7 +383,7 @@ foreach ($commands as $c) {
             $d = $details[$i];
             $d_name = sanitize_c_identifier($d['data_name'] ?: 'field');
             $type = strtolower($d['data_type'] ?? '');
-            if ($type === 'string' || $type === 'object') {
+            if ($type === 'string') {
                 $fn .= "            strcpy(structData.{$d_name}, setupDoc[\"{$c['command_name']}\"][\"default\"][{$i}]);\n";
             } else {
                 $fn .= "            structData.{$d_name} = setupDoc[\"{$c['command_name']}\"][\"default\"][{$i}];\n";
