@@ -56,7 +56,8 @@ $current_page = $_SERVER['REQUEST_URI'];
                 $is_command_active = (
                     strpos($current_page, '/admin/command/dat/') !== false ||
                     strpos($current_page, '/admin/command/exe/') !== false ||
-                    strpos($current_page, '/admin/command/set/') !== false
+                    strpos($current_page, '/admin/command/set/') !== false ||
+                    strpos($current_page, '/admin/command/res/') !== false
                 );
                 ?>
                 <li class="nav-item <?= $is_command_active ? 'active submenu' : '' ?>">
@@ -81,6 +82,11 @@ $current_page = $_SERVER['REQUEST_URI'];
                             <li class="<?= (strpos($current_page, '/admin/command/set/') !== false) ? 'active' : '' ?>">
                                 <a href="./admin/command/set/list">
                                     <span class="sub-item">Command Set</span>
+                                </a>
+                            </li>
+                            <li class="<?= (strpos($current_page, '/admin/command/res') !== false) ? 'active' : '' ?>">
+                                <a href="./admin/command/res/list">
+                                    <span class="sub-item">Command Res</span>
                                 </a>
                             </li>
                         </ul>

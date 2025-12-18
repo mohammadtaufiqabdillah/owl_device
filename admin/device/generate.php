@@ -150,6 +150,7 @@ $detail_stmt->close();
 $set_cmd = array_values(array_filter($commands, fn($x) => ($x['command_type'] ?? '') === 'set'));
 $exe_cmd = array_values(array_filter($commands, fn($x) => ($x['command_type'] ?? '') === 'exe'));
 $dat_cmd = array_values(array_filter($commands, fn($x) => ($x['command_type'] ?? '') === 'dat'));
+$res_cmd = array_values(array_filter($commands, fn($x) => ($x['command_type'] ?? '') === 'res'));
 
 $scriptDir = realpath(__DIR__);
 if ($scriptDir === false) {
@@ -272,6 +273,7 @@ function build_setup_map($arr, $detailsMap)
 $map_set = build_setup_map($set_cmd, $cmd_details_map);
 $map_exe = build_setup_map($exe_cmd, $cmd_details_map);
 $map_dat = build_setup_map($dat_cmd, $cmd_details_map);
+$map_res = build_setup_map($res_cmd, $cmd_details_map);
 
 function build_id_map($arr)
 {
@@ -284,6 +286,7 @@ function build_id_map($arr)
 $map_set_id = build_id_map($set_cmd);
 $map_exe_id = build_id_map($exe_cmd);
 $map_dat_id = build_id_map($dat_cmd);
+$map_res_id = build_id_map($res_cmd);
 
 function build_cstring($varName, $assoc)
 {
@@ -298,12 +301,15 @@ if (!is_dir($ch_src_dir) && !mkdir($ch_src_dir, 0777, true))
 writeOrFail($ch_src_dir . 'setupSetJson.h', build_cstring('setupSetJson', $map_set));
 writeOrFail($ch_src_dir . 'setupExeJson.h', build_cstring('setupExeJson', $map_exe));
 writeOrFail($ch_src_dir . 'setupDatJson.h', build_cstring('setupDatJson', $map_dat));
+writeOrFail($ch_src_dir . 'setupResJson.h', build_cstring('setupResJson', $map_res));
 
 writeOrFail($ch_src_dir . 'commandIdSetJson.h', build_cstring('commandIdSetJson', $map_set_id));
 writeOrFail($ch_src_dir . 'commandIdExeJson.h', build_cstring('commandIdExeJson', $map_exe_id));
 writeOrFail($ch_src_dir . 'commandIdDatJson.h', build_cstring('commandIdDatJson', $map_dat_id));
+writeOrFail($ch_src_dir . 'commandIdResJson.h', build_cstring('commandIdResJson', $map_res_id));
 
 $struct_text = "";
+$struct_res_text = "";
 $queue_decl_text = "";
 $queue_decli_text = "";
 $queue_init_text = "";
@@ -315,31 +321,51 @@ foreach ($commands as $c) {
     $rawname = $c['command_name'] ?? ('cmd' . $c['command_id']);
     $name = sanitize_c_identifier($rawname);
 
-    $struct_text .= "struct {$name}_struct {\n";
+    $isRes = (($c['command_type'] ?? '') === 'res');
+    $details = $cmd_details_map[(int) ($c['command_id'])] ?? [];
 
-    $details = $cmd_details_map[intval($c['command_id'])] ?? [];
+    if ($isRes) {
+        $struct_res_text .= "struct {$name}_res_struct {\n";
+    } else {
+        $struct_text .= "struct {$name}_struct {\n";
+    }
 
     if (empty($details)) {
-        $struct_text .= "    // no fields defined for {$name}\n";
+        if ($isRes) {
+            $struct_res_text .= "    // no fields defined for {$name}\n";
+        } else {
+            $struct_text .= "    // no fields defined for {$name}\n";
+        }
     } else {
         foreach ($details as $d) {
+            $line = "";
             $d_type = trim($d['data_type'] ?? '');
             $d_len = intval($d['data_len'] ?? 0);
             $d_name = sanitize_c_identifier($d['data_name'] ?: 'field');
 
             if ($d_type === 'string') {
                 $len = max(1, $d_len);
-                $struct_text .= "    char {$d_name}[{$len}];\n";
+                $line .= "    char {$d_name}[{$len}];\n";
             } elseif ($d_type === 'object') {
-                $struct_text .= "    JsonDocument {$d_name};\n";
+                $line .= "    JsonDocument {$d_name};\n";
             } else {
                 $type = $d_type ?: 'uint8_t';
-                $struct_text .= "    {$type} {$d_name};\n";
+                $line .= "    {$type} {$d_name};\n";
+            }
+
+            if ($isRes) {
+                $struct_res_text .= $line;
+            } else {
+                $struct_text .= $line;
             }
         }
     }
 
-    $struct_text .= "};\n\n";
+    if ($isRes) {
+        $struct_res_text .= "};\n\n";
+    } else {
+        $struct_text .= "};\n\n";
+    }
 
     if (($c['command_type'] ?? '') === 'set') {
         $queue_decl_text .= "QueueHandle_t {$name}Queue;\n";
@@ -453,9 +479,9 @@ foreach ($possible_h_paths as $p) {
         $content = file_get_contents($p);
         $map = [
             '{{STRUCT_DEFINITIONS}}' => $struct_text,
+            '{{STRUCTS_DEFINITIONS}}' => $struct_res_text,
             '{{QUEUE_DECLARATIONS}}' => $queue_decli_text,
-            '{{QUEUE_DECLARETIONS}}' => $queue_decl_text,
-            '{{STRUCTS_DEFINITIONS}}' => $struct_text
+            '{{QUEUE_DECLARETIONS}}' => $queue_decl_text
         ];
         $new = apply_replacements($content, $map);
         if ($new !== $content)

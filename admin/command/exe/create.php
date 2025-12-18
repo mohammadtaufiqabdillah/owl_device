@@ -27,18 +27,21 @@ if (!$company_code) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $command_name = trim($_POST['nameCommandExe']);
-    $custom_class = trim($_POST['customClassCommand']) ?: null;
-    $description = trim($_POST['commandDescription']) ?: null;
-    $is_main = isset($_POST['commandIsMain']) ? 1 : 0;
+    $conn->begin_transaction();
 
-    $command_type = 'exe';
-    $check = $conn->prepare("SELECT * FROM device_command WHERE company_code = ? AND command_name = ? AND command_type = ?");
-    $check->bind_param("iss", $company_code, $command_name, $command_type);
-    $check->execute();
-    $exist = $check->get_result()->num_rows > 0;
-    if ($exist) {
-        echo "<script src='../../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
+    try {
+        $command_name = trim($_POST['nameCommandExe']);
+        $custom_class = trim($_POST['customClassCommand']) ?: null;
+        $description = trim($_POST['commandDescription']) ?: null;
+        $is_main = isset($_POST['commandIsMain']) ? 1 : 0;
+
+        $command_type = 'exe';
+        $check = $conn->prepare("SELECT * FROM device_command WHERE company_code = ? AND command_name = ? AND command_type = ?");
+        $check->bind_param("iss", $company_code, $command_name, $command_type);
+        $check->execute();
+        $exist = $check->get_result()->num_rows > 0;
+        if ($exist) {
+            echo "<script src='../../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 swal({
@@ -52,53 +55,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
         });
         </script>";
-        exit;
-    }
+            exit;
+        }
 
-    $query = $conn->prepare("SELECT MAX(command_code) AS lastKode FROM device_command WHERE company_code = ? AND command_type = ?");
-    $query->bind_param("is", $company_code, $command_type);
-    $query->execute();
-    $result = $query->get_result()->fetch_assoc();
-    $nextKode = (isset($result['lastKode']) && $result['lastKode'] !== null) ? $result['lastKode'] + 1 : 1;
+        $query = $conn->prepare("SELECT MAX(command_code) AS lastKode FROM device_command WHERE company_code = ? AND command_type = 'exe'");
+        $query->bind_param("i", $company_code);
+        $query->execute();
+        $result = $query->get_result()->fetch_assoc();
+        $nextKode = (isset($result['lastKode']) && $result['lastKode'] !== null) ? $result['lastKode'] + 1 : 1;
 
-    $stmt = $conn->prepare(" INSERT INTO device_command (company_code, command_code, updated_by, command_name, is_main, custom_class, description, command_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param(
-        "iiisisss",
-        $company_code,
-        $nextKode,
-        $user_id,
-        $command_name,
-        $is_main,
-        $custom_class,
-        $description,
-        $command_type
-    );
+        $stmt = $conn->prepare(" INSERT INTO device_command (company_code, command_code, updated_by, command_name, is_main, custom_class, description, command_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param(
+            "iiisisss",
+            $company_code,
+            $nextKode,
+            $user_id,
+            $command_name,
+            $is_main,
+            $custom_class,
+            $description,
+            $command_type
+        );
+        $stmt->execute();
 
-    if ($stmt->execute()) {
+        $exe_id = $stmt->insert_id;
+        $stmt2 = $conn->prepare(" INSERT INTO device_command (company_code, command_code, updated_by, command_name, is_main, custom_class, description, command_type, pair_command_id) VALUES (?, ?, ?, ?, ?, ?, ?, 'res', ?)");
+        $stmt2->bind_param(
+            "iiisissi",
+            $company_code,
+            $nextKode,
+            $user_id,
+            $command_name,
+            $is_main,
+            $custom_class,
+            $description,
+            $exe_id
+        );
+        $stmt2->execute();
+
+        $res_id = $stmt2->insert_id;
+        $link = $conn->prepare(" UPDATE device_command SET pair_command_id = ? WHERE command_id = ?");
+        $link->bind_param("ii", $res_id, $exe_id);
+        $link->execute();
+        $conn->commit();
+
         echo "<script src='../../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 swal({
                     title: 'Berhasil!',
-                    text: 'Error Command Exe berhasil ditambahkan.',
+                    text: 'Command EXE & RES berhasil dibuat.',
                     icon: 'success',
-                    button: false,
-                    timer: 1200,
-                }).then(() => window.location = './admin/command/exe/list');
+                    buttons: false,
+                    timer: 1200
+                }).then(() => {
+                    window.location = './admin/command/exe/list';
+                });
             });
         </script>";
-    } else {
+    } catch (Exception $e) {
+        $conn->rollback();
         echo "<script src='../../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 swal({
                     title: 'Gagal!',
-                    text: 'Terjadi kesalahan saat menyimpan data.',
+                    text: '" . addslashes($e->getMessage()) . "',
                     icon: 'error',
-                    button: false,
-                    timer: 1200,
-                }).then(() => {
-                    window.location = './create';
+                    button: 'OK'
                 });
             });
         </script>";
@@ -204,8 +228,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </div>
-    
-   <!-- Core JS Files -->
+
+    <!-- Core JS Files -->
     <script src="assets/js/core/jquery-3.7.1.min.js"></script>
     <script src="assets/js/core/popper.min.js"></script>
     <script src="assets/js/core/bootstrap.min.js"></script>

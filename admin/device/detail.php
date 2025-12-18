@@ -81,10 +81,30 @@ $queryCommand = "
      AND dvc.company_code = cmd.company_code
     WHERE dvc.device_type_id = '$device_type_id'
       AND dvc.company_code = '$company_code'
+      AND cmd.command_type IN ('dat', 'exe', 'set')
       AND cmd.is_deleted = 0
     ORDER BY cmd.command_type, cmd.command_code ASC
 ";
-$result = mysqli_query($conn, $queryCommand);
+$resultCommand = mysqli_query($conn, $queryCommand);
+
+$queryCommandRes = "
+    SELECT
+        cmd.command_id,
+        cmd.command_code,
+        cmd.command_name,
+        cmd.command_type,
+        cmd.description
+    FROM device_vs_command AS dvc
+    JOIN device_command AS cmd
+      ON dvc.command_id = cmd.command_id
+      AND dvc.company_code = cmd.company_code
+    WHERE dvc.device_type_id = '$device_type_id'
+      AND dvc.company_code = '$company_code'
+      AND cmd.command_type = 'res'
+      AND cmd.is_deleted = 0
+    ORDER BY cmd.command_type, command_code ASC
+    ";
+$resultRes = mysqli_query($conn, $queryCommandRes);
 
 $queryError = "
     SELECT 
@@ -292,7 +312,6 @@ $resultError = mysqli_query($conn, $queryError);
                             </div>
                         </div>
                     </div>
-
                     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
                         <div>
                             <h3 class="fw-bold mb-3">Mapped Commands</h3>
@@ -312,8 +331,7 @@ $resultError = mysqli_query($conn, $queryError);
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="table-responsive card-padding">
-                                        <table id="tableCommandDatDetail"
-                                            class="table table order-list table-striped table-bordered">
+                                        <table class="table table order-list table-striped table-bordered">
                                             <thead>
                                                 <tr>
                                                     <th class="text-center lebar-kolom1">Type</th>
@@ -323,8 +341,8 @@ $resultError = mysqli_query($conn, $queryError);
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <?php if (mysqli_num_rows($result) > 0): ?>
-                                                    <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                                                <?php if (mysqli_num_rows($resultCommand) > 0): ?>
+                                                    <?php while ($row = mysqli_fetch_assoc($resultCommand)): ?>
                                                         <tr>
                                                             <td class="text-center"><?= strtoupper($row['command_type']) ?></td>
                                                             <td class="text-center">
@@ -349,7 +367,6 @@ $resultError = mysqli_query($conn, $queryError);
                             </div>
                         </div>
                     </div>
-
                     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
                         <div>
                             <h3 class="fw-bold mb-3">Mapped Errors</h3>
@@ -369,8 +386,7 @@ $resultError = mysqli_query($conn, $queryError);
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="table-responsive card-padding">
-                                        <table id="tableCommandDatDetail"
-                                            class="table table order-list table-striped table-bordered">
+                                        <table class="table table order-list table-striped table-bordered">
                                             <thead>
                                                 <tr>
                                                     <th class="text-center lebar-kolom1">Code</th>
@@ -393,6 +409,56 @@ $resultError = mysqli_query($conn, $queryError);
                                                             </td>
                                                             <td class="text-center  ">
                                                                 <a href="admin/error_code/edit?error_code_id=<?= $row['error_code_id'] ?>"
+                                                                    class="btn btn-info btn-sm">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endwhile; ?>
+                                                <?php endif; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+                        <div>
+                            <h3 class="fw-bold mb-3">Mapped Responds</h3>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card card-round">
+                                <div class="card-header align-center">
+                                    <button type="button" class="btn btn-secondary"
+                                        onclick="window.location.href='admin/device/list'">Back</button>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive card-padding">
+                                        <table class="table table order-list table-striped table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center lebar-kolom1">Type</th>
+                                                    <th class="text-center lebar-kolom2">Command ID</th>
+                                                    <th class="text-center lebar-kolom3">Command Name</th>
+                                                    <th class="text-center lebar-kolom4">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php if (mysqli_num_rows($resultRes) > 0): ?>
+                                                    <?php while ($row = mysqli_fetch_assoc($resultRes)): ?>
+                                                        <tr>
+                                                            <td class="text-center">RES</td>
+                                                            <td class="text-center">
+                                                                <?= htmlspecialchars($row['command_code']) ?>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <?= htmlspecialchars($row['command_name']) ?>
+                                                            </td>
+                                                            <td class="text-center  ">
+                                                                <a href="admin/command/<?= strtolower($row['command_type']) ?>/detail/list?command_id=<?= $row['command_id'] ?>"
                                                                     class="btn btn-info btn-sm">
                                                                     <i class="fas fa-edit"></i>
                                                                 </a>

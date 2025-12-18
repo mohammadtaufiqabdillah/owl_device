@@ -31,7 +31,7 @@ struct headerCommandStruct {
     uint16_t len; 
 };
 
-{{STRUCT_DEFINITIONS}}
+{{STRUCT_DEFINITIONS}}{{STRUCTS_DEFINITIONS}}
 
 #pragma pack()
 #endif

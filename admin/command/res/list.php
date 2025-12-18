@@ -9,65 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $company_code = $_SESSION['company_code'];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['soft_delete_id'])) {
-    header('Content-Type: application/json');
-
-    $command_id = intval($_POST['soft_delete_id']);
-    if ($command_id <= 0) {
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'ID tidak valid.'
-        ]);
-        exit;
-    }
-
-    $conn->begin_transaction();
-
-    try {
-        $stmt = $conn->prepare(" SELECT command_id, pair_command_id FROM device_command WHERE command_id = ? AND company_code = ? AND command_type = 'exe' AND is_deleted = 0 LIMIT 1");
-        $stmt->bind_param("ii", $command_id, $company_code);
-        $stmt->execute();
-        $exe = $stmt->get_result()->fetch_assoc();
-
-        if (!$exe) {
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Command Exe tidak ditemukan atau sudah dihapus.'
-            ]);
-            exit;
-        }
-
-        $delExe = $conn->prepare(" UPDATE device_command SET is_deleted = 1 WHERE command_id = ? AND company_code = ? ");
-        $delExe->bind_param("ii", $command_id, $company_code);
-        $delExe->execute();
-
-        if (!empty($exe['pair_command_id'])) {
-            $res_id = intval($exe['pair_command_id']);
-
-            $delRes = $conn->prepare(" UPDATE device_command SET is_deleted = 1 WHERE command_id = ? AND company_code = ? ");
-            $delRes->bind_param("ii", $res_id, $company_code);
-            $delRes->execute();
-        }
-
-        $conn->commit();
-
-        echo json_encode([
-            'status' => 'success',
-            'message' => 'Command EXE & RES berhasil dihapus'
-        ]);
-        exit;
-
-    } catch (Exception $e) {
-        $conn->rollback();
-
-        echo json_encode([
-            'status' => 'error',
-            'message' => $e->getMessage()
-        ]);
-        exit;
-    }
-}
-$stmtList = $conn->prepare(" SELECT * FROM device_command WHERE company_code = ? AND command_type = 'exe' AND is_deleted = 0 ORDER BY command_code ASC ");
+$stmtList = $conn->prepare(" SELECT * FROM device_command WHERE company_code = ? AND command_type = 'res' AND is_deleted = 0 ORDER BY command_code ASC ");
 $stmtList->bind_param("i", $company_code);
 $stmtList->execute();
 $result = $stmtList->get_result();
@@ -80,7 +22,7 @@ $result = $stmtList->get_result();
     <base href="<?php echo BASE_URL; ?>">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Commands Exe</title>
+    <title>Commands Res</title>
     <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
     <link rel="icon" href="assets/img/OWLlogo.png" type="image/x-icon" />
 
@@ -137,23 +79,15 @@ $result = $stmtList->get_result();
                 <div class="page-inner">
                     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
                         <div>
-                            <h3 class="fw-bold mb-3">List Command Exe</h3>
+                            <h3 class="fw-bold mb-3">List Command Res</h3>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card card-round">
-                                <div class="card-header align-center">
-                                    <a href="admin/command/exe/create">
-                                        <button type="button" class="btn btn-primary btn-block px-4 py-2.8">
-                                            <i class="fas fa-plus" style="margin-right: 8px;"></i>Create Command
-                                            Exe
-                                        </button>
-                                    </a>
-                                </div>
                                 <div class="card-body p-0">
                                     <div class="table-responsive card-padding">
-                                        <table id="tableCommandExe"
+                                        <table id="tableCommandRes"
                                             class="table table order-list table-striped table-bordered">
                                             <thead>
                                                 <tr>
@@ -182,18 +116,9 @@ $result = $stmtList->get_result();
                                                                 <?php echo $row['is_main'] ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-secondary">No</span>'; ?>
                                                             </td>
                                                             <td class="text-center">
-                                                                <a href="admin/command/exe/edit?command_id=<?php echo $row['command_id']; ?>"
-                                                                    class="btn btn-info btn-sm">
-                                                                    <i class="fas fa-edit"></i>
-                                                                </a>
-                                                                <a href="admin/command/exe/detail/list?command_id=<?php echo $row['command_id']; ?>"
+                                                                <a href="admin/command/res/detail/list?command_id=<?php echo $row['command_id']; ?>"
                                                                     class="btn btn-warning btn-sm">
                                                                     <i class="fas fa-info-circle"></i>
-                                                                </a>
-                                                                <button class="btn btn-danger btn-sm soft-delete-btn"
-                                                                    data-id="<?php echo $row['command_id']; ?>">
-                                                                    <i class="fas fa-trash-alt"></i>
-                                                                </button>
                                                             </td>
                                                         </tr>
                                                         <?php
@@ -231,65 +156,7 @@ $result = $stmtList->get_result();
 
     <script>
         $(document).ready(function () {
-            $('#tableCommandExe').on('click', '.soft-delete-btn', function (e) {
-                e.preventDefault();
-                var userId = $(this).data('id');
-
-                swal({
-                    title: "Hapus Command Exe?",
-                    text: "Command Exe akan dihapus (soft delete) dan disembunyikan dari list jadi is_deleted = 1 apabila ingin tampil is_deleted = 0.",
-                    icon: "warning",
-                    buttons: {
-                        cancel: {
-                            text: "Batal",
-                            visible: true,
-                            className: "btn btn-secondary"
-                        },
-                        confirm: {
-                            text: "Ya, Hapus",
-                            className: "btn btn-danger"
-                        }
-                    },
-                    dangerMode: true,
-                }).then(function (willDelete) {
-                    if (!willDelete) return;
-
-                    $.ajax({
-                        url: "admin/command/exe/list",
-                        method: "POST",
-                        data: { soft_delete_id: userId },
-                        dataType: "json",
-                        success: function (res) {
-                            if (res.status === "success") {
-                                swal({
-                                    icon: "success",
-                                    title: "Berhasil!",
-                                    text: res.message || "Command Exe berhasil dihapus.",
-                                    buttons: false,
-                                    timer: 1200
-                                }).then(function () {
-                                    window.location.replace("admin/command/exe/list");
-                                });
-                            } else {
-                                swal({
-                                    icon: "error",
-                                    title: "Gagal!",
-                                    text: res.message || "Gagal menghapus Command Exe."
-                                });
-                            }
-                        },
-                        error: function (xhr) {
-                            swal({
-                                icon: "error",
-                                title: "Server Error",
-                                text: xhr.responseText || "Terjadi kesalahan pada server."
-                            });
-                        }
-                    });
-                });
-            });
-
-            var table = $('#tableCommandExe').DataTable({
+            var table = $('#tableCommandRes').DataTable({
                 pageLength: 10,
                 lengthMenu: [
                     [10, 25, 50, -1],
@@ -305,12 +172,6 @@ $result = $stmtList->get_result();
                 order: [[0, 'asc']],
                 responsive: true,
             });
-
-            $("table.order-list").on("click", ".ibtnEdit", function (event) {
-                var idToEdit = 123;
-                window.location.href = 'edit.php?id=' + idToEdit;
-            });
-
         });
     </script>
 </body>

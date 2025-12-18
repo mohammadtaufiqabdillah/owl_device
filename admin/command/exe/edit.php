@@ -42,20 +42,23 @@ if (!$command_exe) {
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $command_name = trim($_POST['command_name']);
-    $custom_class = trim($_POST['custom_class']) ?: null;
-    $description = trim($_POST['description']) ?: null;
-    $is_main = isset($_POST['is_main']) ? 1 : 0;
-    $original_name = $command_exe['command_name'];
+    $conn->begin_transaction();
 
-    if (strcasecmp($original_name, $command_name) !== 0) {
-        $check = $conn->prepare("SELECT * FROM device_command WHERE company_code = ? AND command_name COLLATE utf8mb4_general_ci = ? AND command_id != ? LIMIT 1");
-        $check->bind_param("isi", $company_code, $command_name, $command_id);
-        $check->execute();
-        $exist = $check->get_result()->num_rows > 0;
+    try {
+        $command_name = trim($_POST['command_name']);
+        $custom_class = trim($_POST['custom_class']) ?: null;
+        $description = trim($_POST['description']) ?: null;
+        $is_main = isset($_POST['is_main']) ? 1 : 0;
+        $original_name = $command_exe['command_name'];
 
-        if ($exist) {
-            echo "<script src='../../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
+        if (strcasecmp($original_name, $command_name) !== 0) {
+            $check = $conn->prepare("SELECT * FROM device_command WHERE company_code = ? AND command_name COLLATE utf8mb4_general_ci = ? AND command_id != ? LIMIT 1");
+            $check->bind_param("isi", $company_code, $command_name, $command_id);
+            $check->execute();
+            $exist = $check->get_result()->num_rows > 0;
+
+            if ($exist) {
+                echo "<script src='../../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 swal({
@@ -69,44 +72,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 });
             });
         </script>";
-            exit;
+                exit;
+            }
         }
-    }
 
-    $update = $conn->prepare("UPDATE device_command SET command_name = ?, custom_class = ?, description = ?, updated_by = ?, is_main = ? WHERE command_id = ? AND company_code = ?");
-    $update->bind_param("sssiiii", $command_name, $custom_class, $description, $user_id, $is_main, $command_id, $company_code);
+        $update = $conn->prepare("UPDATE device_command SET command_name = ?, custom_class = ?, description = ?, updated_by = ?, is_main = ? WHERE command_id = ? AND company_code = ? AND command_type = 'exe' ");
+        $update->bind_param("sssiiii", $command_name, $custom_class, $description, $user_id, $is_main, $command_id, $company_code);
+        $update->execute();
 
-    if ($update->execute()) {
-        echo "
-            <script src='../../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    swal({
-                        title: 'Berhasil!',
-                        text: 'Command Exe berhasil diperbarui.',
-                        icon: 'success',
-                        buttons: false,
-                        timer: 1200
-                    }).then(() => {
-                        window.location.href = './admin/command/exe/list';
-                    });
-                });
-            </script>";
-    } else {
-        echo "
-            <script src='../../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    swal({
-                        title: 'Gagal!',
-                        text: 'Terjadi kesalahan saat memperbarui data.',
-                        icon: 'error',
-                        buttons: {
-                            confirm: { className: 'btn btn-danger' }
-                        }
-                    });
-                });
-            </script>";
+        $pair = $conn->prepare(" SELECT pair_command_id FROM device_command WHERE command_id = ? ");
+        $pair->bind_param("i", $command_id);
+        $pair->execute();
+        $resPair = $pair->get_result()->fetch_assoc();
+
+        if ($resPair && $resPair['pair_command_id']) {
+            $res_id = intval($resPair['pair_command_id']);
+
+            $updateRes = $conn->prepare(" UPDATE device_command SET command_name = ?, custom_class = ?, description = ?, is_main = ? WHERE command_id = ? AND command_type = 'res' ");
+            $updateRes->bind_param("sssii", $command_name, $custom_class, $description, $is_main, $res_id);
+            $updateRes->execute();
+        }
+        $conn->commit();
+
+        echo "<script src='../../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        swal({
+            title: 'Berhasil!',
+            text: 'Command EXE & RES berhasil diperbarui.',
+            icon: 'success',
+            buttons: false,
+            timer: 1200
+        }).then(() => {
+            window.location.href = './admin/command/exe/list';
+        });
+    });
+    </script>";
+    } catch (Exception $e) {
+        $conn->rollback();
+        echo "<script src='../../../assets/js/plugin/sweetalert/sweetalert.min.js'></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        swal({
+            title: 'Gagal!',
+            text: 'Terjadi kesalahan saat update data.',
+            icon: 'error',
+            button: 'OK'
+        });
+    });
+    </script>
+    ";
+        exit;
     }
 }
 

@@ -18,11 +18,22 @@ if (isset($_GET['action']) && isset($_GET['command_id'])) {
     if ($action === 'add') {
         $query = "INSERT IGNORE INTO device_vs_command (device_type_id, command_id, company_code)
                   VALUES ('$device_type_id', '$command_id', '$company_code')";
+        $qPair = $conn->query(" SELECT pair_command_id, command_type FROM device_command WHERE command_id = '$command_id' AND company_code = '$company_code' LIMIT 1");
+        if ($pair = $qPair->fetch_assoc()) {
+            if ($pair['command_type'] === 'exe' && !empty($pair['pair_command_id'])) {
+                $pair_id = (int) $pair['pair_command_id'];
+                $conn->query(" INSERT IGNORE INTO device_vs_command (device_type_id, command_id, company_code) VALUES ('$device_type_id', '$pair_id', '$company_code')");
+            }
+        }
     } elseif ($action === 'remove') {
-        $query = "DELETE FROM device_vs_command 
-                  WHERE device_type_id = '$device_type_id' 
-                    AND command_id = '$command_id' 
-                    AND company_code = '$company_code'";
+        $query = " DELETE FROM device_vs_command WHERE device_type_id = '$device_type_id' AND command_id = '$command_id' AND company_code = '$company_code' ";
+        $qPair = $conn->query(" SELECT pair_command_id, command_type FROM device_command WHERE command_id = '$command_id' AND company_code = '$company_code' LIMIT 1");
+        if ($pair = $qPair->fetch_assoc()) {
+            if ($pair['command_type'] === 'exe' && !empty($pair['pair_command_id'])) {
+                $pair_id = (int) $pair['pair_command_id'];
+                $conn->query(" DELETE FROM device_vs_command WHERE device_type_id = '$device_type_id' AND command_id = '$pair_id' AND company_code = '$company_code' ");
+            }
+        }
     }
 
     mysqli_query($conn, $query);
@@ -43,6 +54,7 @@ $queryAll = "
     SELECT command_id, command_code, command_name, command_type
     FROM device_command
     WHERE company_code = '$company_code'
+        AND command_type IN ('set', 'exe', 'dat')
         AND is_deleted = 0
     ORDER BY command_type, command_code ASC
 ";
@@ -63,6 +75,7 @@ while ($r = mysqli_fetch_assoc($linkResult)) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <base href="<?php echo BASE_URL; ?>">
     <meta charset="utf-8">
